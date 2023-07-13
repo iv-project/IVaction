@@ -38,8 +38,8 @@ runs:
        path: repo
        fetch-depth: 2
        submodules: true
-    - name: Install Tools on Ubuntu
-      run: |
+   - name: Install Tools on Ubuntu
+     run: |
         NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ${HOME}/.activate_brew
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
