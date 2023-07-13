@@ -37,19 +37,19 @@ runs:
    - name: Install Tools on Ubuntu
      shell: bash
      run: |
+       echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
         NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ${HOME}/.activate_brew
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         sudo apt-get update -y
         sudo apt-get install -y build-essential libfmt-dev
-        brew install --force-bottle ${inputs.brew_pkgs }}
+        brew install --force-bottle ${{ inputs.brew_pkgs }}
    - name: Tool versions
      shell: bash
      run: |
        source ${HOME}/.activate_brew
        env cmake --version
        env ${{ inputs.cxx }} --version
-       echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
    - name: Setup Python
      uses: actions/setup-python@v4
      with:
