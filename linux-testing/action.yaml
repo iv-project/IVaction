@@ -1,10 +1,6 @@
 name: "Linux"
 description: "Standardized building for IV projects"
 
-concurrency:
-  group: ${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 env:
   TZ: Europe/Berlin
 
@@ -53,6 +49,7 @@ runs:
        source ${HOME}/.activate_brew
        env cmake --version
        env ${{ inputs.cxx }} --version
+       echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
    - name: Setup Python
      uses: actions/setup-python@v4
      with:
