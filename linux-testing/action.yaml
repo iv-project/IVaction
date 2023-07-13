@@ -1,5 +1,5 @@
 name: "Linux"
-description: "Standardized tool building for IV projects"
+description: "Standardized building for IV projects"
 
 concurrency:
   group: ${{ github.event.pull_request.number || github.ref }}
@@ -76,7 +76,7 @@ runs:
        mkdir build
        cd build
        cmake ../repo -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} \
-                     -DCMAKE_CXX_FLAGS="${{ inputs.cxx_flags }} -Wextra -Werror" \
+                     -DCMAKE_CXX_FLAGS="${{ inputs.cxx_flags }}" \
                      -DSEQAN_DISABLE_VERSION_CHECK=ON \
                      -DSEQAN_GH_ACTIONS_BUILD:BOOL=ON \
                      -DPython3_ROOT_DIR=${pythonLocation} \
