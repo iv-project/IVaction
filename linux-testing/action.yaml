@@ -1,0 +1,102 @@
+name: "Linux"
+description: "Standardized tool building for IV projects"
+
+concurrency:
+  group: ${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  TZ: Europe/Berlin
+
+inputs:
+  name:
+    description: "Name of this configuration, used for ccache"
+    required: true
+  cc:
+    description: "CC tool"
+    required: true
+  cxx:
+    description: "CPP tool"
+    required: true
+  cxx_flags:
+    description: "additional cxx flags"
+    required: false
+    default: ""
+  brew_pkgs:
+    description: "required brew packages"
+    required: false
+    default: ""
+  build_type:
+    description: "CMake build type"
+    required: true
+runs:
+  using: 'composite'
+  steps:
+   - name: Checkout Repo
+     uses: actions/checkout@v3
+     with:
+       path: repo
+       fetch-depth: 2
+       submodules: true
+    - name: Install Tools on Ubuntu
+      run: |
+        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ${HOME}/.activate_brew
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        sudo apt-get update -y
+        sudo apt-get install -y build-essential libfmt-dev
+        brew install --force-bottle ${inputs.brew_pkgs }}
+   - name: Tool versions
+     shell: bash
+     run: |
+       source ${HOME}/.activate_brew
+       env cmake --version
+       env ${{ inputs.cxx }} --version
+   - name: Setup Python
+     uses: actions/setup-python@v4
+     with:
+       python-version: 3.x
+   - name: Load ccache
+     uses: actions/cache@v3
+     with:
+       path: .ccache
+       key: ${{ runner.os }}-${{ inputs.name }}-ccache-${{ github.ref }}-${{ github.run_number }}
+       # Restoring: From current branch, otherwise from base branch, otherwise from any branch.
+       restore-keys: |
+         ${{ runner.os }}-${{ inputs.name }}-ccache-${{ github.ref }}
+         ${{ runner.os }}-${{ inputs.name }}-ccache-${{ github.base_ref }}
+         ${{ runner.os }}-${{ inputs.name }}-ccache-
+   - name: Configure tests
+     shell: bash
+     env:
+       CXX: ${{ inputs.cxx }}
+       CC: ${{ inputs.cc }}
+     run: |
+       source ${HOME}/.activate_brew
+       mkdir build
+       cd build
+       cmake ../repo -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} \
+                     -DCMAKE_CXX_FLAGS="${{ inputs.cxx_flags }} -Wextra -Werror" \
+                     -DSEQAN_DISABLE_VERSION_CHECK=ON \
+                     -DSEQAN_GH_ACTIONS_BUILD:BOOL=ON \
+                     -DPython3_ROOT_DIR=${pythonLocation} \
+                     -DPython3_EXECUTABLE=${pythonLocation}/bin/python3 \
+                     -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+                     -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+   - name: Build tests
+     shell: bash
+     env:
+       CCACHE_BASEDIR: ${{ github.workspace }}
+       CCACHE_DIR: ${{ github.workspace }}/.ccache
+       CCACHE_COMPRESS: true
+       CCACHE_COMPRESSLEVEL: 6
+       CCACHE_MAXSIZE: 200M
+     run: |
+       source ${HOME}/.activate_brew
+       cd build
+       make -k -j2
+   - name: Run tests
+     shell: bash
+     run: |
+       cd build
+       ctest . -j2 --output-on-failure --timeout 240 || ctest . -j2 --output-on-failure --timeout 240 --rerun-failed
