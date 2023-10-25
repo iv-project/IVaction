@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2006-2023, Knut Reinert & Freie Universität Berlin
+# SPDX-FileCopyrightText: 2016-2023, Knut Reinert & MPI für molekulare Genetik
+# SPDX-License-Identifier: CC0-1.0
 name: "Linux"
 description: "Standardized building for IV projects"
 
@@ -33,11 +36,10 @@ runs:
   using: 'composite'
   steps:
    - name: Checkout Repo
-     uses: actions/checkout@v3
+     uses: actions/checkout@v4
      with:
        path: repo
-       fetch-depth: 2
-       submodules: true
+       submodules: recursive
    - name: Install Tools on Ubuntu
      shell: bash
      run: |
