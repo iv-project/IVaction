@@ -49,6 +49,7 @@ runs:
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         sudo apt-get update -y
         sudo apt-get install -y build-essential libfmt-dev
+        brew upgrade
         brew install --force-bottle ${{ inputs.brew_pkgs }}
    - name: Tool versions
      shell: bash
