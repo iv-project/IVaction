@@ -8,9 +8,6 @@ env:
   TZ: Europe/Berlin
 
 inputs:
-  name:
-    description: "Name of this configuration, used for ccache"
-    required: true
   compiler:
     description: "which compiler to use \"gcc12-cpp20-release\", \"clang16-cpp17-debug\", etc"
     required: true
@@ -18,6 +15,10 @@ inputs:
     description: "additional cmake flags"
     required: false
     default: ""
+  threads:
+    description: "number of threads to use"
+    required: false
+    default: 1
 runs:
   using: 'composite'
   steps:
@@ -136,10 +137,10 @@ runs:
      run: |
        source env.sh
        cd build
-       make -k -j2
+       make -k -j ${{ inputs.threads }}
    - name: Run tests
      shell: bash
      run: |
        source env.sh
        cd build
-       ctest . -j2 --output-on-failure --timeout 240 || ctest . -j2 --output-on-failure --timeout 240 --rerun-failed
+       ctest . -j ${{ inputs.threads }} --output-on-failure --timeout 240 || ctest . -j ${{ inputs.threads }} --output-on-failure --timeout 240 --rerun-failed
