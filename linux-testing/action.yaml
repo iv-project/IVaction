@@ -19,6 +19,15 @@ inputs:
     description: "number of threads to use"
     required: false
     default: 1
+  cov_secret:
+    description: "codecov secret"
+    required: false
+    default: ""
+  cov_url:
+    description: "upload url of codecov"
+    required: false
+    default: ""
+
 runs:
   using: 'composite'
   steps:
@@ -37,6 +46,7 @@ runs:
         echo "Setup for " ${{ inputs.compiler }}
         echo "export CXX_STANDARD=cpp20" >> env.sh
         echo "export BUILD_TYPE=Release" >> env.sh
+        echo "export GCOV=gcov" >> env.sh
    - name: Install tools
      shell: bash
      run: |
@@ -120,6 +130,15 @@ runs:
      run: |
        echo "export BUILD_TYPE=Debug" >> env.sh
 
+   - name: Setup lcov
+     if: ${{ endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-') }}
+     shell: bash
+     run: |
+       source env.sh
+       sudo apt-get install lcov
+       lcov --version
+       echo "export ACTION_COVFLAGS='-DCMAKE_CXX_FLAGS=--coverage -DCMAKE_C_FLAGS=--coverage'" >> env.sh
+
    - name: Tool versions
      shell: bash
      run: |
@@ -131,7 +150,7 @@ runs:
      run: |
        source env.sh
        mkdir build && cd $_
-       cmake ../repo -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }}
+       cmake ../repo -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} ${ACTION_COVFLAGS:-}
    - name: Build tests
      shell: bash
      run: |
@@ -144,3 +163,19 @@ runs:
        source env.sh
        cd build
        ctest . -j ${{ inputs.threads }} --output-on-failure --timeout 240 || ctest . -j ${{ inputs.threads }} --output-on-failure --timeout 240 --rerun-failed
+   - name: Generate Coverage report and upload
+     shell: bash
+     if: ${{ endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-') }}
+     run: |
+       source env.sh
+       cd build
+       lcov -c --directory . --output coverage.info --gcov ${GCOV}
+       lcov --remove coverage.info --ignore-errors unused '/usr/include/*' --output-file coverage.info
+       lcov --remove coverage.info --ignore-errors unused '/home/linuxbrew/*' --output-file coverage.info
+       lcov --remove coverage.info --ignore-errors unused '*/lib/*' --output-file coverage.info
+       lcov --list coverage.info
+       #gcovr -r ../ivio . --xml -o report.xml -e ../ivio/lib --exclude-noncode-lines --exclude-unreachable-branches --exclude-function-lines
+       #gcovr -r ../ . --html --html-details --html-syntax-highlighting -o report.html -e ../lib
+       curl -Os ${{ inputs.cov_url }}
+       chmod +x codecov
+       ./codecov -t ${{ inputs.CODECOV }} -f coverage.info -B ${{ github.ref_name }}
