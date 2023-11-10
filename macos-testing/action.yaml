@@ -1,0 +1,140 @@
+# SPDX-FileCopyrightText: 2006-2023, Knut Reinert & Freie Universität Berlin
+# SPDX-FileCopyrightText: 2016-2023, Knut Reinert & MPI für molekulare Genetik
+# SPDX-License-Identifier: CC0-1.0
+name: "MacOS"
+description: "Standardized building for IV projects"
+
+env:
+  TZ: Europe/Berlin
+
+inputs:
+  compiler:
+    description: "which compiler to use \"gcc12-cpp20-release\", \"clang16-cpp17-debug\", etc"
+    required: true
+  cmake_flags:
+    description: "additional cmake flags"
+    required: false
+    default: ""
+  threads:
+    description: "number of threads to use"
+    required: false
+    default: 1
+runs:
+  using: 'composite'
+  steps:
+   - name: Checkout Repo
+     uses: actions/checkout@v4
+     with:
+       path: repo
+       submodules: recursive
+   - name: Install tools
+     shell: bash
+     run: |
+        echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
+        echo 'eval "$(brew shellenv)"' >> env.sh
+        echo "Setup for " ${{ inputs.compiler }}
+        echo "export CXX_STANDARD=cpp20" >> env.sh
+        echo "export BUILD_TYPE=Release" > env.sh
+        brew update-reset
+        brew install --force-bottle --overwrite fmt boost cmake pkg-config bash
+
+   - name: Setup gcc 11
+     if: ${{ startsWith(inputs.compiler, 'gcc11-') || (inputs.compiler == 'gcc11') }}
+     shell: bash
+     run: |
+       source env.sh
+       brew install --force-bottle gcc@11
+       brew link -f gcc@11
+       echo "export CXX=g++-11" >> env.sh
+
+   - name: Setup gcc 12
+     if: ${{ startsWith(inputs.compiler, 'gcc12-') || (inputs.compiler == 'gcc12') }}
+     shell: bash
+     run: |
+       source env.sh
+       brew install --force-bottle gcc@12
+       brew link -f gcc@12
+       echo "export CXX=g++-12" >> env.sh
+
+   - name: Setup gcc 13
+     if: ${{ startsWith(inputs.compiler, 'gcc13-') || (inputs.compiler == 'gcc13') }}
+     shell: bash
+     run: |
+       source env.sh
+       brew install --force-bottle gcc@13
+       brew link -f gcc@13
+       echo "export CXX=g++-13" >> env.sh
+
+   - name: Setup clang 15
+     if: ${{ startsWith(inputs.compiler, 'clang15-') || (inputs.compiler == 'clang15') }}
+     shell: bash
+     run: |
+       source env.sh
+       brew install --force-bottle llvm@15
+       brew link -f llvm@15
+       echo "export CXX=clang++-15" >> env.sh
+
+   - name: Setup clang 16
+     if: ${{ startsWith(inputs.compiler, 'clang16-') || (inputs.compiler == 'clang16') }}
+     shell: bash
+     run: |
+       source env.sh
+       brew install --force-bottle llvm@16
+       brew link -f llvm@16
+       echo "export CXX=clang++-16" >> env.sh
+
+   - name: Setup c++17
+     if: ${{ endsWith(inputs.compiler, '-cpp17') || contains(inputs.compiler, '-cpp17-') }}
+     shell: bash
+     run: |
+       echo "export CXX_STANDARD=cpp17" >> env.sh
+
+   - name: Setup c++20
+     if: ${{ endsWith(inputs.compiler, '-cpp20') || contains(inputs.compiler, '-cpp20-') }}
+     shell: bash
+     run: |
+       echo "export CXX_STANDARD=cpp20" >> env.sh
+
+   - name: Setup c++23
+     if: ${{ endsWith(inputs.compiler, '-cpp23') || contains(inputs.compiler, '-cpp23-') }}
+     shell: bash
+     run: |
+       echo "export CXX_STANDARD=cpp23" >> env.sh
+
+
+   - name: Setup release
+     if: ${{ endsWith(inputs.compiler, '-release') || contains(inputs.compiler, '-release-') }}
+     shell: bash
+     run: |
+       echo "export BUILD_TYPE=Release" >> env.sh
+
+   - name: Setup Debug
+     if: ${{ endsWith(inputs.compiler, '-debug') || contains(inputs.compiler, '-debug-') }}
+     shell: bash
+     run: |
+       echo "export BUILD_TYPE=Debug" >> env.sh
+
+   - name: Tool versions
+     shell: bash
+     run: |
+       source env.sh
+       cmake --version
+       ${CXX} --version
+   - name: Configure tests
+     shell: bash
+     run: |
+       source env.sh
+       mkdir build && cd $_
+       cmake ../repo -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }}
+   - name: Build tests
+     shell: bash
+     run: |
+       source env.sh
+       cd build
+       make -k -j ${{ inputs.threads }} VERBOSE=1
+   - name: Run tests
+     shell: bash
+     run: |
+       source env.sh
+       cd build
+       ctest . -j ${{ inputs.threads }} --output-on-failure --timeout 240 || ctest . -j ${{ inputs.threads }} --output-on-failure --timeout 240 --rerun-failed
