@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2006-2023, Knut Reinert & Freie Universität Berlin
 # SPDX-FileCopyrightText: 2016-2023, Knut Reinert & MPI für molekulare Genetik
 # SPDX-License-Identifier: CC0-1.0
-name: "Linux"
+name: "MacOS"
 description: "Standardized building for IV projects"
 
 env:
@@ -27,23 +27,16 @@ runs:
      with:
        path: repo
        submodules: recursive
-   - name: Install brew
-     shell: bash
-     run: |
-        echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
-        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' > env.sh
-        echo "Setup for " ${{ inputs.compiler }}
-        echo "export CXX_STANDARD=cpp20" >> env.sh
-        echo "export BUILD_TYPE=Release" >> env.sh
    - name: Install tools
      shell: bash
      run: |
-        source env.sh
-        sudo apt-get update -y
-        sudo apt-get install -y build-essential libfmt-dev
-        brew upgrade
+        echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
+        echo 'eval "$(brew shellenv)"' > env.sh
+        echo "Setup for " ${{ inputs.compiler }}
+        echo "export CXX_STANDARD=cpp20" >> env.sh
+        echo "export BUILD_TYPE=Release" >> env.sh
+        brew update-reset
+        brew install --force-bottle --overwrite fmt boost cmake pkg-config bash
 
    - name: Setup gcc 11
      if: ${{ startsWith(inputs.compiler, 'gcc11-') || (inputs.compiler == 'gcc11') }}
@@ -52,7 +45,7 @@ runs:
        source env.sh
        brew install --force-bottle gcc@11
        brew link -f gcc@11
-       echo "export CXX=g++" >> env.sh
+       echo "export CXX=g++-11" >> env.sh
 
    - name: Setup gcc 12
      if: ${{ startsWith(inputs.compiler, 'gcc12-') || (inputs.compiler == 'gcc12') }}
@@ -61,7 +54,7 @@ runs:
        source env.sh
        brew install --force-bottle gcc@12
        brew link -f gcc@12
-       echo "export CXX=g++" >> env.sh
+       echo "export CXX=g++-12" >> env.sh
 
    - name: Setup gcc 13
      if: ${{ startsWith(inputs.compiler, 'gcc13-') || (inputs.compiler == 'gcc13') }}
@@ -70,7 +63,7 @@ runs:
        source env.sh
        brew install --force-bottle gcc@13
        brew link -f gcc@13
-       echo "export CXX=g++" >> env.sh
+       echo "export CXX=g++-13" >> env.sh
 
    - name: Setup clang 15
      if: ${{ startsWith(inputs.compiler, 'clang15-') || (inputs.compiler == 'clang15') }}
@@ -108,6 +101,7 @@ runs:
      run: |
        echo "export CXX_STANDARD=cpp23" >> env.sh
 
+
    - name: Setup release
      if: ${{ endsWith(inputs.compiler, '-release') || contains(inputs.compiler, '-release-') }}
      shell: bash
@@ -124,8 +118,8 @@ runs:
      shell: bash
      run: |
        source env.sh
-       env cmake --version
-       env ${CXX} --version
+       cmake --version
+       ${CXX} --version
    - name: Configure tests
      shell: bash
      run: |
@@ -137,7 +131,7 @@ runs:
      run: |
        source env.sh
        cd build
-       make -k -j ${{ inputs.threads }}
+       make -k -j ${{ inputs.threads }} VERBOSE=1
    - name: Run tests
      shell: bash
      run: |
