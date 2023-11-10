@@ -31,10 +31,10 @@ runs:
      shell: bash
      run: |
         echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
-        echo 'eval "$(brew shellenv)"' >> env.sh
+        echo 'eval "$(brew shellenv)"' > env.sh
         echo "Setup for " ${{ inputs.compiler }}
         echo "export CXX_STANDARD=cpp20" >> env.sh
-        echo "export BUILD_TYPE=Release" > env.sh
+        echo "export BUILD_TYPE=Release" >> env.sh
         brew update-reset
         brew install --force-bottle --overwrite fmt boost cmake pkg-config bash
 
@@ -72,7 +72,7 @@ runs:
        source env.sh
        brew install --force-bottle llvm@15
        brew link -f llvm@15
-       echo "export CXX=clang++-15" >> env.sh
+       echo "export CXX=clang++" >> env.sh
 
    - name: Setup clang 16
      if: ${{ startsWith(inputs.compiler, 'clang16-') || (inputs.compiler == 'clang16') }}
@@ -81,7 +81,7 @@ runs:
        source env.sh
        brew install --force-bottle llvm@16
        brew link -f llvm@16
-       echo "export CXX=clang++-16" >> env.sh
+       echo "export CXX=clang++" >> env.sh
 
    - name: Setup c++17
      if: ${{ endsWith(inputs.compiler, '-cpp17') || contains(inputs.compiler, '-cpp17-') }}

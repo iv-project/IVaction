@@ -33,9 +33,10 @@ runs:
         echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
         NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> env.sh
-        echo "export BUILD_TYPE=Release" >> env.sh
+        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' > env.sh
+        echo "Setup for " ${{ inputs.compiler }}
         echo "export CXX_STANDARD=cpp20" >> env.sh
+        echo "export BUILD_TYPE=Release" >> env.sh
    - name: Install tools
      shell: bash
      run: |
@@ -44,41 +45,10 @@ runs:
         sudo apt-get install -y build-essential libfmt-dev
         brew upgrade
 
-   - name: Setup release
-     if: ${{ endsWith(inputs.compiler, '-release') || contains(inputs.compiler, '-release-') }}
-     shell: bash
-     run:
-       echo "export BUILD_TYPE=Release" >> env.sh
-
-   - name: Setup Debug
-     if: ${{ endsWith(inputs.compiler, '-debug') || contains(inputs.compiler, '-debug-') }}
-     shell: bash
-     run:
-       echo "export BUILD_TYPE=Debug" >> env.sh
-
-   - name: Setup c++17
-     if: ${{ endsWith(inputs.compiler, '-cpp17') || contains(inputs.compiler, '-cpp17-') }}
-     shell: bash
-     run:
-       echo "export CXX_STANDARD=cpp17" >> env.sh
-
-   - name: Setup c++20
-     if: ${{ endsWith(inputs.compiler, '-cpp20') || contains(inputs.compiler, '-cpp20-') }}
-     shell: bash
-     run:
-       echo "export CXX_STANDARD=cpp20" >> env.sh
-
-   - name: Setup c++23
-     if: ${{ endsWith(inputs.compiler, '-cpp23') || contains(inputs.compiler, '-cpp23-') }}
-     shell: bash
-     run:
-       echo "export CXX_STANDARD=cpp23" >> env.sh
-
-
    - name: Setup gcc 11
      if: ${{ startsWith(inputs.compiler, 'gcc11-') || (inputs.compiler == 'gcc11') }}
      shell: bash
-     run:
+     run: |
        source env.sh
        brew install --force-bottle gcc@11
        brew link -f gcc@11
@@ -87,7 +57,7 @@ runs:
    - name: Setup gcc 12
      if: ${{ startsWith(inputs.compiler, 'gcc12-') || (inputs.compiler == 'gcc12') }}
      shell: bash
-     run:
+     run: |
        source env.sh
        brew install --force-bottle gcc@12
        brew link -f gcc@12
@@ -96,29 +66,59 @@ runs:
    - name: Setup gcc 13
      if: ${{ startsWith(inputs.compiler, 'gcc13-') || (inputs.compiler == 'gcc13') }}
      shell: bash
-     run:
+     run: |
        source env.sh
        brew install --force-bottle gcc@13
        brew link -f gcc@13
        echo "export CXX=g++" >> env.sh
 
    - name: Setup clang 15
-     if: ${{ startsWith(inputs.compiler, 'clang15') || (inputs.compiler == 'clang15') }}
+     if: ${{ startsWith(inputs.compiler, 'clang15-') || (inputs.compiler == 'clang15') }}
      shell: bash
-     run:
+     run: |
        source env.sh
        brew install --force-bottle llvm@15
        brew link -f llvm@15
        echo "export CXX=clang++" >> env.sh
 
    - name: Setup clang 16
-     if: ${{ startsWith(inputs.compiler, 'clang16') || (inputs.compiler == 'clang16') }}
+     if: ${{ startsWith(inputs.compiler, 'clang16-') || (inputs.compiler == 'clang16') }}
      shell: bash
-     run:
+     run: |
        source env.sh
        brew install --force-bottle llvm@16
        brew link -f llvm@16
        echo "export CXX=clang++" >> env.sh
+
+   - name: Setup c++17
+     if: ${{ endsWith(inputs.compiler, '-cpp17') || contains(inputs.compiler, '-cpp17-') }}
+     shell: bash
+     run: |
+       echo "export CXX_STANDARD=cpp17" >> env.sh
+
+   - name: Setup c++20
+     if: ${{ endsWith(inputs.compiler, '-cpp20') || contains(inputs.compiler, '-cpp20-') }}
+     shell: bash
+     run: |
+       echo "export CXX_STANDARD=cpp20" >> env.sh
+
+   - name: Setup c++23
+     if: ${{ endsWith(inputs.compiler, '-cpp23') || contains(inputs.compiler, '-cpp23-') }}
+     shell: bash
+     run: |
+       echo "export CXX_STANDARD=cpp23" >> env.sh
+
+   - name: Setup release
+     if: ${{ endsWith(inputs.compiler, '-release') || contains(inputs.compiler, '-release-') }}
+     shell: bash
+     run: |
+       echo "export BUILD_TYPE=Release" >> env.sh
+
+   - name: Setup Debug
+     if: ${{ endsWith(inputs.compiler, '-debug') || contains(inputs.compiler, '-debug-') }}
+     shell: bash
+     run: |
+       echo "export BUILD_TYPE=Debug" >> env.sh
 
    - name: Tool versions
      shell: bash
