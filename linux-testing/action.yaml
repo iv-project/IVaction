@@ -23,10 +23,6 @@ inputs:
     description: "codecov secret"
     required: false
     default: ""
-  cov_url:
-    description: "upload url of codecov"
-    required: false
-    default: ""
 
 runs:
   using: 'composite'
@@ -36,6 +32,7 @@ runs:
      with:
        path: repo
        submodules: recursive
+       fetch-depth: 2 # Required by codecov
    - name: Install brew
      shell: bash
      run: |
@@ -137,6 +134,7 @@ runs:
        source env.sh
        sudo apt-get install lcov
        lcov --version
+       echo "export BUILD_TYPE=Debug" >> env.sh
        echo "export ACTION_COVFLAGS='-DCMAKE_CXX_FLAGS=--coverage -DCMAKE_C_FLAGS=--coverage'" >> env.sh
 
    - name: Tool versions
@@ -149,33 +147,45 @@ runs:
      shell: bash
      run: |
        source env.sh
-       mkdir build && cd $_
-       cmake ../repo -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} ${ACTION_COVFLAGS:-}
+       mkdir -p repo/build && cd $_
+       cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} ${ACTION_COVFLAGS:-}
    - name: Build tests
      shell: bash
      run: |
        source env.sh
-       cd build
+       cd repo/build
        make -k -j ${{ inputs.threads }}
+   - name: Generate base coverage
+     shell: bash
+     if: ${{ endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-') }}
+     run: |
+       source env.sh
+       cd repo/build
+       lcov --help
+       lcov -c -i --directory . --output coverage_base.info --gcov ${GCOV} --base-directory ..
+
    - name: Run tests
      shell: bash
      run: |
        source env.sh
-       cd build
+       cd repo/build
        ctest . -j ${{ inputs.threads }} --output-on-failure --timeout 240 || ctest . -j ${{ inputs.threads }} --output-on-failure --timeout 240 --rerun-failed
    - name: Generate Coverage report and upload
      shell: bash
      if: ${{ endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-') }}
      run: |
        source env.sh
-       cd build
-       lcov -c --directory . --output coverage.info --gcov ${GCOV}
-       lcov --remove coverage.info --ignore-errors unused '/usr/include/*' --output-file coverage.info
-       lcov --remove coverage.info --ignore-errors unused '/home/linuxbrew/*' --output-file coverage.info
-       lcov --remove coverage.info --ignore-errors unused '*/lib/*' --output-file coverage.info
+       cd repo/build
+       lcov -c --directory . --output coverage_test.info --gcov ${GCOV} --base-directory ..
+       lcov -a coverage_base.info -a coverage_test.info -o coverage.info
+       lcov --extract coverage.info '*/repo/*' --output-file coverage.info
+       lcov --remove coverage.info --ignore-errors unused '*/repo/lib/*' --output-file coverage.info
+       lcov --remove coverage.info --ignore-errors unused '*/repo/docs/*' --output-file coverage.info
+       lcov --remove coverage.info --ignore-errors unused '*/repo/CMakeCCompilerId.c' --output-file coverage.info
+       lcov --remove coverage.info --ignore-errors unused '*/repo/CMakeCXXCompilerId.cpp' --output-file coverage.info
        lcov --list coverage.info
        #gcovr -r ../ivio . --xml -o report.xml -e ../ivio/lib --exclude-noncode-lines --exclude-unreachable-branches --exclude-function-lines
        #gcovr -r ../ . --html --html-details --html-syntax-highlighting -o report.html -e ../lib
-       curl -Os ${{ inputs.cov_url }}
+       curl -Os https://uploader.codecov.io/latest/linux/codecov
        chmod +x codecov
        ./codecov -t ${{ inputs.CODECOV }} -f coverage.info -B ${{ github.ref_name }}
