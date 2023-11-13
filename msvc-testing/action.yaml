@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2006-2023, Knut Reinert & Freie Universität Berlin
+# SPDX-FileCopyrightText: 2016-2023, Knut Reinert & MPI für molekulare Genetik
+# SPDX-License-Identifier: CC0-1.0
+name: "Windows Server 2022"
+description: "Standardized building for IV projects"
+
+env:
+  TZ: Europe/Berlin
+
+inputs: {}
+
+runs:
+  using: 'composite'
+  steps:
+   - name: Checkout Repo
+     uses: actions/checkout@v4
+     with:
+       path: repo
+       submodules: recursive
+   - uses: ilammy/msvc-dev-cmd@v1
+   - name: Install Tools on Windows
+     shell: bash
+     run: |
+       vcpkg integrate install
+       vcpkg install fmt fmt:x64-windows
+   - name: Build something requiring CL.EXE
+     shell: bash
+     run: |
+       mkdir build
+       cd build
+       cmake ../repo -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release
+       nmake VERBOSE=1
+   - name: Run tests
+     shell: bash
+     run: |
+       cd build
+       ctest . --output-on-failure
