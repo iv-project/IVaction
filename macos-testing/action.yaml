@@ -73,6 +73,7 @@ runs:
        brew install --force-bottle llvm@15
        brew link -f llvm@15
        echo "export CXX=clang++" >> env.sh
+       echo 'export PATH="/usr/local/opt/llvm@15/bin:$PATH"' >> env.sh
 
    - name: Setup clang 16
      if: ${{ startsWith(inputs.compiler, 'clang16-') || (inputs.compiler == 'clang16') }}
@@ -82,6 +83,7 @@ runs:
        brew install --force-bottle llvm@16
        brew link -f llvm@16
        echo "export CXX=clang++" >> env.sh
+       echo 'export PATH="/usr/local/opt/llvm@16/bin:$PATH"' >> env.sh
 
    - name: Setup clang 17
      if: ${{ startsWith(inputs.compiler, 'clang17-') || (inputs.compiler == 'clang17') }}
@@ -91,6 +93,7 @@ runs:
        brew install --force-bottle llvm@17
        brew link -f llvm@17
        echo "export CXX=clang++" >> env.sh
+       echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> env.sh
 
    - name: Setup c++17
      if: ${{ endsWith(inputs.compiler, '-cpp17') || contains(inputs.compiler, '-cpp17-') }}
