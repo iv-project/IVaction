@@ -97,6 +97,15 @@ runs:
        brew link -f llvm@16
        echo "export CXX=clang++" >> env.sh
 
+   - name: Setup clang 17
+     if: ${{ startsWith(inputs.compiler, 'clang17-') || (inputs.compiler == 'clang17') }}
+     shell: bash
+     run: |
+       source env.sh
+       brew install --force-bottle llvm@17
+       brew link -f llvm@17
+       echo "export CXX=clang++" >> env.sh
+
    - name: Setup c++17
      if: ${{ endsWith(inputs.compiler, '-cpp17') || contains(inputs.compiler, '-cpp17-') }}
      shell: bash
