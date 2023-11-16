@@ -43,6 +43,8 @@ runs:
         echo "Setup for " ${{ inputs.compiler }}
         echo "export CXX_STANDARD=cpp20" >> env.sh
         echo "export BUILD_TYPE=Release" >> env.sh
+        echo "export CMAKE_CXX_FLAGS=" >> env.sh
+        echo "export CMAKE_C_FLAGS=" >> env.sh
         echo "export GCOV=gcov" >> env.sh
    - name: Install tools
      shell: bash
@@ -135,29 +137,29 @@ runs:
      shell: bash
      run: |
        echo "export BUILD_TYPE=Debug" >> env.sh
-       echo "export CMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer\"" >> env.sh
-       echo "export CMAKE_C_FLAGS=\"${CMAKE_C_FLAGS} -fno-omit-frame-pointer\"" >> env.sh
+       echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer"' >> env.sh
+       echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fno-omit-frame-pointer"' >> env.sh
 
    - name: Setup Strict
      if: ${{ endsWith(inputs.compiler, '-strict') || contains(inputs.compiler, '-strict-') }}
      shell: bash
      run: |
-       echo "export CMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS} -Wall -Werror -Wpedantic -Wextra\"" >> env.sh
-       echo "export CMAKE_C_FLAGS=\"${CMAKE_C_FLAGS} -Wall -Werror -Wpedantic -Wextra\"" >> env.sh
+       echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wall -Werror -Wpedantic -Wextra"' >> env.sh
+       echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wall -Werror -Wpedantic -Wextra"' >> env.sh
 
    - name: Setup Sanitize Address
      if: ${{ endsWith(inputs.compiler, '-sanitize_address') || contains(inputs.compiler, '-sanitize_address-') }}
      shell: bash
      run: |
-       echo "export CMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS} -fsanitize=address\"" >> env.sh
-       echo "export CMAKE_C_FLAGS=\"${CMAKE_C_FLAGS} -fsanitize=address\"" >> env.sh
+       echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fsanitize=address"' >> env.sh
+       echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fsanitize=address"' >> env.sh
 
    - name: Setup Sanitize Undefined Behavior
      if: ${{ endsWith(inputs.compiler, '-sanitize_undefined') || contains(inputs.compiler, '-sanitize_undefined-') }}
      shell: bash
      run: |
-       echo "export CMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS} -fsanitize=undefined\"" >> env.sh
-       echo "export CMAKE_C_FLAGS=\"${CMAKE_C_FLAGS} -fsanitize=undefined\"" >> env.sh
+       echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fsanitize=undefined"' >> env.sh
+       echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fsanitize=undefined"' >> env.sh
 
    - name: Setup lcov
      if: ${{ endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-') }}
