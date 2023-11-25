@@ -19,7 +19,7 @@ inputs:
     description: "number of threads to use"
     required: false
     default: 1
-  cov_secret:
+  CODECOV_TOKEN:
     description: "codecov secret"
     required: false
     default: ""
@@ -51,7 +51,7 @@ runs:
      run: |
         source env.sh
         sudo apt-get update -y
-        sudo apt-get install -y build-essential libfmt-dev
+        sudo apt-get install -y build-essential
         brew upgrade
 
    - name: Setup gcc 11
@@ -223,4 +223,7 @@ runs:
        #gcovr -r ../ . --html --html-details --html-syntax-highlighting -o report.html -e ../lib
        curl -Os https://uploader.codecov.io/latest/linux/codecov
        chmod +x codecov
-       ./codecov -t ${{ inputs.CODECOV }} -f coverage.info -B ${{ github.ref_name }}
+       if [ -n "${{ inputs.CODECOV_TOKEN }}" ]; then
+         export CODECOV="-t ${{ inputs.CODECOV_TOKEN }}"
+       fi
+       ./codecov ${CODECOV:-} -f coverage.info -B ${{ github.ref_name }}

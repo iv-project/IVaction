@@ -18,11 +18,6 @@ runs:
        path: repo
        submodules: recursive
    - uses: ilammy/msvc-dev-cmd@v1
-   - name: Install Tools on Windows
-     shell: bash
-     run: |
-       vcpkg integrate install
-       vcpkg install fmt fmt:x64-windows
    - name: Build something requiring CL.EXE
      shell: bash
      run: |
