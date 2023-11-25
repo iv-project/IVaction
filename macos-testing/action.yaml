@@ -39,7 +39,7 @@ runs:
         echo "export CMAKE_C_FLAGS=" >> env.sh
 
         brew update-reset
-        brew install --force-bottle --overwrite fmt boost cmake pkg-config bash
+        brew install --force-bottle --overwrite cmake pkg-config bash
 
    - name: Setup gcc 11
      if: ${{ startsWith(inputs.compiler, 'gcc11-') || (inputs.compiler == 'gcc11') }}
