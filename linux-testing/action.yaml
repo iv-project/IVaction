@@ -41,7 +41,7 @@ runs:
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
         echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' > env.sh
         echo "Setup for " ${{ inputs.compiler }}
-        echo "export CXX_STANDARD=cpp20" >> env.sh
+        echo "export CXX_STANDARD=20" >> env.sh
         echo "export BUILD_TYPE=Release" >> env.sh
         echo "export CMAKE_CXX_FLAGS=" >> env.sh
         echo "export CMAKE_C_FLAGS=" >> env.sh
@@ -112,19 +112,19 @@ runs:
      if: ${{ endsWith(inputs.compiler, '-cpp17') || contains(inputs.compiler, '-cpp17-') }}
      shell: bash
      run: |
-       echo "export CXX_STANDARD=cpp17" >> env.sh
+       echo "export CXX_STANDARD=17" >> env.sh
 
    - name: Setup c++20
      if: ${{ endsWith(inputs.compiler, '-cpp20') || contains(inputs.compiler, '-cpp20-') }}
      shell: bash
      run: |
-       echo "export CXX_STANDARD=cpp20" >> env.sh
+       echo "export CXX_STANDARD=20" >> env.sh
 
    - name: Setup c++23
      if: ${{ endsWith(inputs.compiler, '-cpp23') || contains(inputs.compiler, '-cpp23-') }}
      shell: bash
      run: |
-       echo "export CXX_STANDARD=cpp23" >> env.sh
+       echo "export CXX_STANDARD=23" >> env.sh
 
    - name: Setup release
      if: ${{ endsWith(inputs.compiler, '-release') || contains(inputs.compiler, '-release-') }}
