@@ -36,23 +36,23 @@ runs:
    - name: Install brew
      shell: bash
      run: |
-        echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
-        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' > env.sh
-        echo "Setup for " ${{ inputs.compiler }}
-        echo "export CXX_STANDARD=20" >> env.sh
-        echo "export BUILD_TYPE=Release" >> env.sh
-        echo "export CMAKE_CXX_FLAGS=" >> env.sh
-        echo "export CMAKE_C_FLAGS=" >> env.sh
-        echo "export GCOV=gcov" >> env.sh
+       echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
+       NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+       eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+       echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' > env.sh
+       echo "Setup for " ${{ inputs.compiler }}
+       echo "export CXX_STANDARD=20" >> env.sh
+       echo "export BUILD_TYPE=Release" >> env.sh
+       echo "export CMAKE_CXX_FLAGS=" >> env.sh
+       echo "export CMAKE_C_FLAGS=" >> env.sh
+       echo "export GCOV=gcov" >> env.sh
    - name: Install tools
      shell: bash
      run: |
-        source env.sh
-        sudo apt-get update -y
-        sudo apt-get install -y build-essential
-        brew upgrade
+       source env.sh
+       sudo apt-get update -y
+       sudo apt-get install -y build-essential
+       brew upgrade
 
    - name: Setup gcc 11
      if: ${{ startsWith(inputs.compiler, 'gcc11-') || (inputs.compiler == 'gcc11') }}
