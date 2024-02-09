@@ -36,23 +36,23 @@ runs:
    - name: Install brew
      shell: bash
      run: |
-        echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
-        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' > env.sh
-        echo "Setup for " ${{ inputs.compiler }}
-        echo "export CXX_STANDARD=20" >> env.sh
-        echo "export BUILD_TYPE=Release" >> env.sh
-        echo "export CMAKE_CXX_FLAGS=" >> env.sh
-        echo "export CMAKE_C_FLAGS=" >> env.sh
-        echo "export GCOV=gcov" >> env.sh
+       echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
+       NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+       eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+       echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' > env.sh
+       echo "Setup for " ${{ inputs.compiler }}
+       echo "export CXX_STANDARD=20" >> env.sh
+       echo "export BUILD_TYPE=Release" >> env.sh
+       echo "export CMAKE_CXX_FLAGS=" >> env.sh
+       echo "export CMAKE_C_FLAGS=" >> env.sh
+       echo "export GCOV=gcov" >> env.sh
    - name: Install tools
      shell: bash
      run: |
-        source env.sh
-        sudo apt-get update -y
-        sudo apt-get install -y build-essential
-        brew upgrade
+       source env.sh
+       sudo apt-get update -y
+       sudo apt-get install -y build-essential
+       brew upgrade
 
    - name: Setup gcc 11
      if: ${{ startsWith(inputs.compiler, 'gcc11-') || (inputs.compiler == 'gcc11') }}
@@ -107,6 +107,26 @@ runs:
        brew install --force-bottle llvm@17
        brew link -f llvm@17
        echo "export CXX=clang++" >> env.sh
+
+   - name: Setup intel
+     if: ${{ startsWith(inputs.compiler, 'intel-') || (inputs.compiler == 'intel') }}
+     shell: bash
+     run: |
+       source env.sh
+       wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+       sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+       rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+       sudo echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+       sudo apt-get update -y
+       sudo apt-get install -y intel-oneapi-compiler-dpcpp-cpp
+       echo "source /opt/intel/oneapi/setvars.sh" >> env.sh
+       sudo ln -fs $(icpx --print-prog-name=llvm-ar) /usr/bin/ar
+       sudo ln -fs $(icpx --print-prog-name=lld) /usr/bin/ld
+       sudo ln -fs $(icpx --print-prog-name=llvm-nm) /usr/bin/nm
+       sudo ln -fs $(icpx --print-prog-name=llvm-ranlib) /usr/bin/ranlib
+       echo "CC=icx" >> "${GITHUB_ENV}"
+       echo "CXX=icpx" >> "${GITHUB_ENV}"
+
 
    - name: Setup c++17
      if: ${{ endsWith(inputs.compiler, '-cpp17') || contains(inputs.compiler, '-cpp17-') }}
