@@ -181,4 +181,4 @@ runs:
      run: |
        source env.sh
        cd build
-       ctest . -j ${{ inputs.threads }} --output-on-failure --timeout 240 || ctest . -j ${{ inputs.threads }} --output-on-failure --timeout 240 --rerun-failed
+       ctest . -j ${{ inputs.threads }} --output-on-failure ${CTEST_TIMEOUT+--timeout ${CTEST_TIMEOUT}} || ctest . -j ${{ inputs.threads }} --output-on-failure ${CTEST_TIMEOUT+--timeout ${CTEST_TIMEOUT}} --rerun-failed
