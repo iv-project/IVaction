@@ -7,7 +7,22 @@ description: "Standardized building for IV projects"
 env:
   TZ: Europe/Berlin
 
-inputs: {}
+inputs:
+  compiler:
+    description: "which compiler to use \"msvc-cpp20-release\", \"msvc-cpp17-debug\", etc"
+    required: true
+  cmake_flags:
+    description: "additional cmake flags"
+    required: false
+    default: ""
+  threads:
+    description: "number of threads to use"
+    required: false
+    default: 1
+  ctest_timeout:
+    description: "ctest timeout value in seconds"
+    required: false
+    default: 7200
 
 runs:
   using: 'composite'
@@ -18,15 +33,56 @@ runs:
        path: repo
        submodules: recursive
    - uses: ilammy/msvc-dev-cmd@v1
+   - name: Setup environment
+     shell: bash
+     run: |
+        echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
+        echo "Setup for " ${{ inputs.compiler }}
+        echo "export CXX_STANDARD=20" >> env.sh
+        echo "export BUILD_TYPE=Release" >> env.sh
+        echo "export CMAKE_CXX_FLAGS=" >> env.sh
+        echo "export CMAKE_C_FLAGS=" >> env.sh
+
+   - name: Setup c++17
+     if: ${{ endsWith(inputs.compiler, '-cpp17') || contains(inputs.compiler, '-cpp17-') }}
+     shell: bash
+     run: |
+       echo "export CXX_STANDARD=17" >> env.sh
+
+   - name: Setup c++20
+     if: ${{ endsWith(inputs.compiler, '-cpp20') || contains(inputs.compiler, '-cpp20-') }}
+     shell: bash
+     run: |
+       echo "export CXX_STANDARD=20" >> env.sh
+
+   - name: Setup c++23
+     if: ${{ endsWith(inputs.compiler, '-cpp23') || contains(inputs.compiler, '-cpp23-') }}
+     shell: bash
+     run: |
+       echo "export CXX_STANDARD=23" >> env.sh
+
+
+   - name: Setup release
+     if: ${{ endsWith(inputs.compiler, '-release') || contains(inputs.compiler, '-release-') }}
+     shell: bash
+     run: |
+       echo "export BUILD_TYPE=Release" >> env.sh
+
+   - name: Setup Debug
+     if: ${{ endsWith(inputs.compiler, '-debug') || contains(inputs.compiler, '-debug-') }}
+     shell: bash
+     run: |
+       echo "export BUILD_TYPE=Debug" >> env.sh
+
    - name: Build something requiring CL.EXE
      shell: bash
      run: |
        mkdir build
        cd build
-       cmake ../repo -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release
+       cmake ../repo -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
        nmake VERBOSE=1
    - name: Run tests
      shell: bash
      run: |
        cd build
-       ctest . --output-on-failure  ${CTEST_TIMEOUT+--timeout ${CTEST_TIMEOUT}}
+       ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }}
