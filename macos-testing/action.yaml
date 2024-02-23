@@ -19,6 +19,11 @@ inputs:
     description: "number of threads to use"
     required: false
     default: 1
+  ctest_timeout:
+    description: "ctest timeout value in seconds"
+    required: false
+    default: 120
+
 runs:
   using: 'composite'
   steps:
@@ -181,4 +186,4 @@ runs:
      run: |
        source env.sh
        cd build
-       ctest . -j ${{ inputs.threads }} --output-on-failure ${CTEST_TIMEOUT+--timeout ${CTEST_TIMEOUT}} || ctest . -j ${{ inputs.threads }} --output-on-failure ${CTEST_TIMEOUT+--timeout ${CTEST_TIMEOUT}} --rerun-failed
+       ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} || ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} --rerun-failed

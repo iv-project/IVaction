@@ -23,6 +23,10 @@ inputs:
     description: "codecov secret"
     required: false
     default: ""
+  ctest_timeout:
+    description: "ctest timeout value in seconds"
+    required: false
+    default: 120
 
 runs:
   using: 'composite'
@@ -224,7 +228,7 @@ runs:
      run: |
        source env.sh
        cd repo/build
-       ctest . -j ${{ inputs.threads }} --output-on-failure ${CTEST_TIMEOUT+--timeout ${CTEST_TIMEOUT}} || ctest . -j ${{ inputs.threads }} --output-on-failure ${CTEST_TIMEOUT+--timeout ${CTEST_TIMEOUT}} --rerun-failed
+       ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} || ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} --rerun-failed
    - name: Generate Coverage report and upload
      shell: bash
      if: ${{ endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-') }}
