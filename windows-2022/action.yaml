@@ -4,9 +4,6 @@
 name: "Windows Server 2022"
 description: "Standardized building for IV projects"
 
-env:
-  TZ: Europe/Berlin
-
 inputs:
   compiler:
     description: "which compiler to use \"msvc-cpp20-release\", \"msvc-cpp17-debug\", etc"
