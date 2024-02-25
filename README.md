@@ -10,7 +10,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 ## Synopsis
 ```
-      - uses: iv-project/IVaction/linux-testing@v8.2
+      - uses: iv-project/IVaction/ubuntu-22.04@v8.2
         with:
           compiler: gcc12-cpp20-debug
 ```
@@ -19,9 +19,9 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 For each OS it provides a custom action:
 
-- iv-project/IVaction/linux-testing@v8.2
-- iv-project/IVaction/macos-testing@v8.2
-- iv-project/IVaction/msvc-testing@v8.2
+- iv-project/IVaction/ubuntu-22.04@v8.2
+- iv-project/IVaction/macos-12@v8.2
+- iv-project/IVaction/windows-2022@v8.2
 
 Each take following arguments:
 - `compiler` (required) \
@@ -63,7 +63,7 @@ Cancels running actions.
 
 More complete example can be found in [fmindex_collection](https://github.com/SGSSGene/fmindex-collection/tree/main/.github/workflows).
 ```
-name: "Linux"
+name: "CI"
 
 on:
   push:
@@ -72,32 +72,34 @@ on:
   pull_request:
 
 concurrency:
-  group: linux-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
-    name: ${{ matrix.compiler }}
-    runs-on: ubuntu-22.04
-    timeout-minutes: 60
+    name: ${{matrix.os}}-${{ matrix.compiler }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        compiler:
-          - gcc13-cpp20-release
-          - gcc12-cpp20-release
-          - gcc11-cpp20-release
-          - gcc13-cpp20-debug-sanitize_address
-          - gcc13-cpp20-debug-sanitize_undefined
-          - gcc13-cpp20-lcov
-          - clang16-cpp20-release
-          - clang17-cpp20-release
-          - intel-cpp20-release
+        include:
+          - {os: ubuntu-22.04, compiler: spdx_reuse_lint}
+          - {os: ubuntu-22.04, compiler: cpm_version_check}
+          - {os: ubuntu-22.04, compiler: gcc13-cpp20-release}
+          - {os: ubuntu-22.04, compiler: gcc12-cpp20-release}
+          - {os: ubuntu-22.04, compiler: gcc11-cpp20-release}
+          - {os: ubuntu-22.04, compiler: gcc13-cpp20-debug-sanitize_address}
+          - {os: ubuntu-22.04, compiler: gcc13-cpp20-debug-sanitize_undefined}
+          - {os: ubuntu-22.04, compiler: gcc13-cpp20-lcov}
+          - {os: ubuntu-22.04, compiler: clang17-cpp20-release}
+          - {os: macos-12, compiler: gcc13-cpp20-release}
+          - {os: macos-12, compiler: clang17-cpp20-release}
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction/linux-testing@v8.2
+        uses: iv-project/IVaction/${{ matrix.os }}@6f960e67a6e095c9a5c1370b737cca0a8ebb019e
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
-          ctest_timout: 60
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 ```
