@@ -50,6 +50,7 @@ runs:
        echo "export CMAKE_CXX_FLAGS=" >> env.sh
        echo "export CMAKE_C_FLAGS=" >> env.sh
        echo "export GCOV=gcov" >> env.sh
+       echo "MODE=unknown" >> "$GITHUB_ENV"
    - name: Install tools
      shell: bash
      run: |
@@ -66,6 +67,7 @@ runs:
        brew install --force-bottle gcc@11
        brew link -f gcc@11
        echo "export CXX=g++" >> env.sh
+       echo "MODE=compile" >> "$GITHUB_ENV"
 
    - name: Setup gcc 12
      if: ${{ startsWith(inputs.compiler, 'gcc12-') || (inputs.compiler == 'gcc12') }}
@@ -75,6 +77,7 @@ runs:
        brew install --force-bottle gcc@12
        brew link -f gcc@12
        echo "export CXX=g++" >> env.sh
+       echo "MODE=compile" >> "$GITHUB_ENV"
 
    - name: Setup gcc 13
      if: ${{ startsWith(inputs.compiler, 'gcc13-') || (inputs.compiler == 'gcc13') }}
@@ -84,6 +87,7 @@ runs:
        brew install --force-bottle gcc@13
        brew link -f gcc@13
        echo "export CXX=g++" >> env.sh
+       echo "MODE=compile" >> "$GITHUB_ENV"
 
    - name: Setup clang 15
      if: ${{ startsWith(inputs.compiler, 'clang15-') || (inputs.compiler == 'clang15') }}
@@ -93,6 +97,7 @@ runs:
        brew install --force-bottle llvm@15
        brew link -f llvm@15
        echo "export CXX=clang++" >> env.sh
+       echo "MODE=compile" >> "$GITHUB_ENV"
 
    - name: Setup clang 16
      if: ${{ startsWith(inputs.compiler, 'clang16-') || (inputs.compiler == 'clang16') }}
@@ -102,6 +107,7 @@ runs:
        brew install --force-bottle llvm@16
        brew link -f llvm@16
        echo "export CXX=clang++" >> env.sh
+       echo "MODE=compile" >> "$GITHUB_ENV"
 
    - name: Setup clang 17
      if: ${{ startsWith(inputs.compiler, 'clang17-') || (inputs.compiler == 'clang17') }}
@@ -111,6 +117,7 @@ runs:
        brew install --force-bottle llvm@17
        brew link -f llvm@17
        echo "export CXX=clang++" >> env.sh
+       echo "MODE=compile" >> "$GITHUB_ENV"
 
    - name: Setup intel
      if: ${{ startsWith(inputs.compiler, 'intel-') || (inputs.compiler == 'intel') }}
@@ -195,28 +202,91 @@ runs:
        echo "export BUILD_TYPE=Debug" >> env.sh
        echo "export CMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS} --coverage\"" >> env.sh
        echo "export CMAKE_C_FLAGS=\"${CMAKE_C_FLAGS} --coverage\"" >> env.sh
+   - name: cpm_version_check
+     if: ${{ endsWith(inputs.compiler, '-cpm_version_check') || contains(inputs.compiler, '-cpm_version_check-') || startsWith(inputs.compiler, 'cpm_version_check-') || (inputs.compiler == 'cpm_version_check') }}
+     shell: bash
+     run: |
+       source env.sh
+       if [ "${MODE}" == "unknown" ]; then
+         echo "MODE=compile" >> "$GITHUB_ENV"
+       fi
 
+       cd ./repo
+       mkdir cpm_check_version
+       echo '#!/usr/bin/env bash
+
+         name=${1:-}
+         path=${2:-}
+         version=${3:-}
+
+         [ -z "${name}" ] &&        # no name given
+         [ -z "${path}" ] &&        # no path given
+         [ -z "${version}" ] &&     # no version given
+         [ "${version}" == "0" ] && # version 0, means no version
+         [ $(echo "${version}" | wc -c) -eq 40 ] && # full hash
+             exit 0
+
+         cd $path
+         git fetch origin '"'"'refs/tags/*:refs/tags/*'"'"'
+         newestVersion=$(git tag | cat - <(echo ${version}) | sed "s/^v//" | sort -V -r | head -n 1)
+
+         if [ "${newestVersion}" == "${version}" ] \
+             || [ v"${newsetVersion}" == "${version}" ]; then
+             exit 0;
+         fi
+
+         # does newest Version has a leading "v"?, then add it
+         if [ $(git tag | grep v${newestVersion} | wc -l) -eq 1 ]; then
+             newestVersion=v${newestVersion}
+         fi
+
+         echo "ERROR: Newer version of \"${name}\" (${version} -> ${newestVersion}) available"
+         exit 1
+       ' | sed 's/^  //' > cpm_check_version/isNewestVersion.sh
+       chmod +x cpm_check_version/isNewestVersion.sh
+       echo 'cmake_minimum_required (VERSION 3.14)
+         project("CPM_CHECK_VERSION")
+
+         add_subdirectory(.. cpm_check_version)
+         add_custom_target(CPM_CHECK_NEWER_PACKAGES)
+         foreach(package ${CPM_PACKAGES})
+             add_custom_target(CPM_CHECK_NEWER_PACKAGES_${package}
+                 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/isNewestVersion.sh
+                               ${package}
+                               ${CPM_PACKAGE_${package}_SOURCE_DIR}
+                               ${CPM_PACKAGE_${package}_VERSION}
+             )
+             add_dependencies(CPM_CHECK_NEWER_PACKAGES CPM_CHECK_NEWER_PACKAGES_${package})
+         endforeach()
+       ' | sed 's/^  //' > cpm_check_version/CMakeLists.txt
+       mkdir build-cpm_check_version
+       cd $_
+       cmake ../cpm_check_version
+       make CPM_CHECK_NEWER_PACKAGES
    - name: Tool versions
+     if: env.MODE == 'compile'
      shell: bash
      run: |
        source env.sh
        env cmake --version
        env ${CXX} --version
    - name: Configure tests
+     if: env.MODE == 'compile'
      shell: bash
      run: |
        source env.sh
        mkdir -p repo/build && cd $_
        cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
    - name: Build tests
+     if: env.MODE == 'compile'
      shell: bash
      run: |
        source env.sh
        cd repo/build
        make -k -j ${{ inputs.threads }}
    - name: Generate base coverage
-     shell: bash
      if: ${{ endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-') }}
+     shell: bash
      run: |
        source env.sh
        cd repo/build
@@ -224,14 +294,15 @@ runs:
        lcov -c -i --directory . --output coverage_base.info --gcov ${GCOV} --base-directory ..
 
    - name: Run tests
+     if: env.MODE == 'compile'
      shell: bash
      run: |
        source env.sh
        cd repo/build
        ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} || ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} --rerun-failed
    - name: Generate Coverage report and upload
-     shell: bash
      if: ${{ endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-') }}
+     shell: bash
      run: |
        source env.sh
        cd repo/build
