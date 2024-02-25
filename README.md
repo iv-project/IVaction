@@ -44,6 +44,7 @@ Each take following arguments:
     - `sanitize_address` - activates address sanitizer flags
     - `sanitize_undefined` - activates undefined behaviour sanitizer flags
     - `lcov` - generates and uploads code coverage data (linux)
+    - `cpm_version_check` - checks if CPM and the dependencies are the newest version (linux)
 
 - `cmake_flags` (optional, default: "") \
     additional cmake flags
