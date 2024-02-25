@@ -45,6 +45,7 @@ Each take following arguments:
     - `sanitize_undefined` - activates undefined behaviour sanitizer flags
     - `lcov` - generates and uploads code coverage data (linux)
     - `cpm_version_check` - checks if CPM and the dependencies are the newest version (linux)
+    - `spdx_reuse_lint` - checks if all files follow spdx header licensing (linux)
 
 - `cmake_flags` (optional, default: "") \
     additional cmake flags

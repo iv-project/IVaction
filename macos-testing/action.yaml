@@ -4,9 +4,6 @@
 name: "MacOS"
 description: "Standardized building for IV projects"
 
-env:
-  TZ: Europe/Berlin
-
 inputs:
   compiler:
     description: "which compiler to use \"gcc12-cpp20-release\", \"clang16-cpp17-debug\", etc"

@@ -4,9 +4,6 @@
 name: "Linux"
 description: "Standardized building for IV projects"
 
-env:
-  TZ: Europe/Berlin
-
 inputs:
   compiler:
     description: "which compiler to use \"gcc12-cpp20-release\", \"clang16-cpp17-debug\", etc"
@@ -203,7 +200,7 @@ runs:
        echo "export CMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS} --coverage\"" >> env.sh
        echo "export CMAKE_C_FLAGS=\"${CMAKE_C_FLAGS} --coverage\"" >> env.sh
    - name: cpm_version_check
-     if: ${{ endsWith(inputs.compiler, '-cpm_version_check') || contains(inputs.compiler, '-cpm_version_check-') || startsWith(inputs.compiler, 'cpm_version_check-') || (inputs.compiler == 'cpm_version_check') }}
+     if: ${{ inputs.compiler == 'cpm_version_check' }}
      shell: bash
      run: |
        source env.sh
@@ -263,6 +260,13 @@ runs:
        cd $_
        cmake ../cpm_check_version
        make CPM_CHECK_NEWER_PACKAGES
+
+   - name: REUSE Compliance Check
+     if: ${{ inputs.compiler == 'spdx_license_lint' }}
+     uses: fsfe/reuse-action@v2
+     with:
+       args: --suppress-deprecation lint
+
    - name: Tool versions
      if: env.MODE == 'compile'
      shell: bash
