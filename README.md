@@ -25,7 +25,7 @@ For each OS it provides a custom action:
 
 Each take following arguments:
 - `compiler` (required) \
-    Which compiler to use \"gcc12-cpp20-release\", \"clang16-cpp17-debug\", etc
+    Which compiler to use `gcc12-cpp20-release`, `clang16-cpp17-debug`, etc
     This string can be set togther from following options:
     - `gcc11` - selects gcc 11 (linux and macos)
     - `gcc12` - selects gcc 12 (linux and macos)
@@ -51,7 +51,7 @@ Each take following arguments:
     additional cmake flags
 - `threads`: (optional, default: 1) \
     number of threads to use
-- `CODECOV_TOKEN`: (optional, default: "") \
+- `codecov_token`: (optional, default: "") \
     codecov secret, only required if code coverage is being required.
 - `ctest_timeout` (optional, default: 7200) \
     ctest timeout value in seconds
@@ -97,9 +97,9 @@ jobs:
           - {os: macos-12, compiler: clang17-cpp20-release}
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction/${{ matrix.os }}@6f960e67a6e095c9a5c1370b737cca0a8ebb019e
+        uses: iv-project/IVaction@v9.1 # make sure this is the newest version
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
 ```
