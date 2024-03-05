@@ -229,57 +229,9 @@ runs:
     shell: bash
     run: |
       source env.sh
-      cd ./repo
-      mkdir cpm_check_version
-      echo '#!/usr/bin/env bash
-
-        name=${1:-}
-        path=${2:-}
-        version=${3:-}
-
-        [ -z "${name}" ] &&        # no name given
-        [ -z "${path}" ] &&        # no path given
-        [ -z "${version}" ] &&     # no version given
-        [ "${version}" == "0" ] && # version 0, means no version
-        [ $(echo "${version}" | wc -c) -eq 40 ] && # full hash
-            exit 0
-
-        cd $path
-        git fetch origin '"'"'refs/tags/*:refs/tags/*'"'"'
-        newestVersion=$(git tag | cat - <(echo ${version}) | sed "s/^v//" | sort -V -r | head -n 1)
-
-        if [ "${newestVersion}" == "${version}" ] \
-            || [ v"${newsetVersion}" == "${version}" ]; then
-            exit 0;
-        fi
-
-        # does newest Version has a leading "v"?, then add it
-        if [ $(git tag | grep v${newestVersion} | wc -l) -eq 1 ]; then
-            newestVersion=v${newestVersion}
-        fi
-
-        echo "ERROR: Newer version of \"${name}\" (${version} -> ${newestVersion}) available"
-        exit 1
-      ' | sed 's/^  //' > cpm_check_version/isNewestVersion.sh
-      chmod +x cpm_check_version/isNewestVersion.sh
-      echo 'cmake_minimum_required (VERSION 3.14)
-        project("CPM_CHECK_VERSION")
-
-        add_subdirectory(.. cpm_check_version)
-        add_custom_target(CPM_CHECK_NEWER_PACKAGES)
-        foreach(package ${CPM_PACKAGES})
-            add_custom_target(CPM_CHECK_NEWER_PACKAGES_${package}
-                COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/isNewestVersion.sh
-                              ${package}
-                              ${CPM_PACKAGE_${package}_SOURCE_DIR}
-                              ${CPM_PACKAGE_${package}_VERSION}
-            )
-            add_dependencies(CPM_CHECK_NEWER_PACKAGES CPM_CHECK_NEWER_PACKAGES_${package})
-        endforeach()
-      ' | sed 's/^  //' > cpm_check_version/CMakeLists.txt
-      mkdir build-cpm_check_version
-      cd $_
-      cmake ../cpm_check_version
+      cp -r "${{ github.action_path }}"/cpm_check_version .
+      cd cpm_check_version
+      cmake .
       make CPM_CHECK_NEWER_PACKAGES
 
   - name: REUSE Compliance Check
