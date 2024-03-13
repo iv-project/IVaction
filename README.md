@@ -19,9 +19,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 For each OS it provides a custom action:
 
-- iv-project/IVaction/ubuntu-22.04@v8.2
-- iv-project/IVaction/macos-12@v8.2
-- iv-project/IVaction/windows-2022@v8.2
+- iv-project/IVaction@v9.5
 
 Each take following arguments:
 - `compiler` (required) \
@@ -97,7 +95,7 @@ jobs:
           - {os: macos-12, compiler: clang17-cpp20-release}
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction@v9.1 # make sure this is the newest version
+        uses: iv-project/IVaction@v9.5 # make sure this is the newest version
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
