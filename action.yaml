@@ -72,8 +72,7 @@ runs:
       source env.sh
       brew install --force-bottle gcc@11
       brew link -f gcc@11
-      echo "export CXX=g++" >> env.sh
-      test "$RUNNER_OS" == "macOS" && echo "export CXX=g++-11" >> env.sh
+      echo "export CXX=g++-11" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup gcc 12 (Linux, macOS)
@@ -83,8 +82,7 @@ runs:
       source env.sh
       brew install --force-bottle gcc@12
       brew link -f gcc@12
-      echo "export CXX=g++" >> env.sh
-      test "$RUNNER_OS" == "macOS" && echo "export CXX=g++-12" >> env.sh
+      echo "export CXX=g++-12" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup gcc 13 (Linux, macOS)
@@ -94,8 +92,7 @@ runs:
       source env.sh
       brew install --force-bottle gcc@13
       brew link -f gcc@13
-      echo "export CXX=g++" >> env.sh
-      test "$RUNNER_OS" == "macOS" && echo "export CXX=g++-13" >> env.sh
+      echo "export CXX=g++-13" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup clang 15 (Linux, macOS)
