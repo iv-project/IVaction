@@ -233,9 +233,9 @@ runs:
 
   - name: REUSE Compliance Check
     if: ${{ inputs.compiler == 'spdx_license_lint' }}
-    uses: fsfe/reuse-action@v2
+    uses: fsfe/reuse-action@v3
     with:
-      args: --suppress-deprecation lint
+      args: --suppress-deprecation --root repo lint
 
 
   - name: Tool versions (Linux, macOS)
