@@ -73,6 +73,7 @@ runs:
       brew install --force-bottle gcc@11
       brew link -f gcc@11
       echo "export CXX=g++-11" >> env.sh
+      echo "export CC=gcc-11" >> env.sh
       echo "export GCOV=gcov-11" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
@@ -84,6 +85,7 @@ runs:
       brew install --force-bottle gcc@12
       brew link -f gcc@12
       echo "export CXX=g++-12" >> env.sh
+      echo "export CC=gcc-12" >> env.sh
       echo "export GCOV=gcov-12" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
@@ -95,6 +97,7 @@ runs:
       brew install --force-bottle gcc@13
       brew link -f gcc@13
       echo "export CXX=g++-13" >> env.sh
+      echo "export CC=gcc-13" >> env.sh
       echo "export GCOV=gcov-13" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
@@ -106,6 +109,7 @@ runs:
       brew install --force-bottle llvm@15
       brew link -f llvm@15
       echo "export CXX=clang++" >> env.sh
+      echo "export CC=clang" >> env.sh
       INSTALL_PREFIX=$(brew --prefix llvm@15)
       echo "export PATH=\"${INSTALL_PREFIX}/bin:$PATH\"" >> env.sh
       echo "export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++\"" >> env.sh
@@ -119,6 +123,7 @@ runs:
       brew install --force-bottle llvm@16
       brew link -f llvm@16
       echo "export CXX=clang++" >> env.sh
+      echo "export CC=clang" >> env.sh
       INSTALL_PREFIX=$(brew --prefix llvm@16)
       echo "export PATH=\"${INSTALL_PREFIX}/bin:$PATH\"" >> env.sh
       echo "export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++\"" >> env.sh
@@ -132,6 +137,7 @@ runs:
       brew install --force-bottle llvm@17
       brew link -f llvm@17
       echo "export CXX=clang++" >> env.sh
+      echo "export CC=clang" >> env.sh
       INSTALL_PREFIX=$(brew --prefix llvm@17)
       echo "export PATH=\"${INSTALL_PREFIX}/bin:$PATH\"" >> env.sh
       echo "export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++\"" >> env.sh
