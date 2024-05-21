@@ -10,7 +10,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 ## Synopsis
 ```
-      - uses: iv-project/IVaction/ubuntu-22.04@v8.2
+      - uses: iv-project/IVaction@v9.9
         with:
           compiler: gcc12-cpp20-debug
 ```
@@ -19,7 +19,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 For each OS it provides a custom action:
 
-- iv-project/IVaction@v9.5
+- iv-project/IVaction@v9.9
 
 Each take following arguments:
 - `compiler` (required) \
@@ -28,6 +28,7 @@ Each take following arguments:
     - `gcc11` - selects gcc 11 (linux and macos)
     - `gcc12` - selects gcc 12 (linux and macos)
     - `gcc13` - selects gcc 13(linux and macos)
+    - `gcc14` - selects gcc 14(linux and macos)
     - `clang15` - selects clang 15 (linux and macos)
     - `clang16` - selects clang 16 (linux and macos)
     - `clang17` - selects clang 17 (linux and macos)
