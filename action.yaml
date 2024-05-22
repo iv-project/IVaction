@@ -101,6 +101,18 @@ runs:
       echo "export GCOV=gcov-13" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
+  - name: Setup gcc 14 (Linux, macOS)
+    if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'gcc14-') || (inputs.compiler == 'gcc14'))
+    shell: bash
+    run: |
+      source env.sh
+      brew install --force-bottle gcc@14
+      brew link -f gcc@14
+      echo "export CXX=g++-14" >> env.sh
+      echo "export CC=gcc-14" >> env.sh
+      echo "export GCOV=gcov-14" >> env.sh
+      echo "MODE=compile" >> "$GITHUB_ENV"
+
   - name: Setup clang 15 (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'clang15-') || (inputs.compiler == 'clang15'))
     shell: bash
