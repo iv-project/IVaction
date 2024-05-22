@@ -27,8 +27,8 @@ Each take following arguments:
     This string can be set togther from following options:
     - `gcc11` - selects gcc 11 (linux and macos)
     - `gcc12` - selects gcc 12 (linux and macos)
-    - `gcc13` - selects gcc 13(linux and macos)
-    - `gcc14` - selects gcc 14(linux and macos)
+    - `gcc13` - selects gcc 13 (linux and macos)
+    - `gcc14` - selects gcc 14 (linux and macos)
     - `clang15` - selects clang 15 (linux and macos)
     - `clang16` - selects clang 16 (linux and macos)
     - `clang17` - selects clang 17 (linux and macos)
