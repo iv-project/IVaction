@@ -27,8 +27,8 @@ Each take following arguments:
     This string can be set togther from following options:
     - `gcc11` - selects gcc 11 (linux and macos)
     - `gcc12` - selects gcc 12 (linux and macos)
-    - `gcc13` - selects gcc 13(linux and macos)
-    - `gcc14` - selects gcc 14(linux and macos)
+    - `gcc13` - selects gcc 13 (linux and macos)
+    - `gcc14` - selects gcc 14 (linux and macos)
     - `clang15` - selects clang 15 (linux and macos)
     - `clang16` - selects clang 16 (linux and macos)
     - `clang17` - selects clang 17 (linux and macos)
@@ -42,6 +42,7 @@ Each take following arguments:
     - `strict` - activates stricter compiler flags (linux and macos)
     - `sanitize_address` - activates address sanitizer flags
     - `sanitize_undefined` - activates undefined behaviour sanitizer flags
+    - `sanitize_thread` - activates thread sanitizer flags
     - `lcov` - generates and uploads code coverage data (linux)
     - `cpm_version_check` - checks if CPM and the dependencies are the newest version (linux)
     - `spdx_license_lint` - checks if all files follow spdx header licensing (linux)

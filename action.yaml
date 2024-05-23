@@ -232,6 +232,13 @@ runs:
       echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fsanitize=undefined"' >> env.sh
       echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fsanitize=undefined"' >> env.sh
 
+  - name: Setup Sanitize Thread (Linux)
+    if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-sanitize_thread') || contains(inputs.compiler, '-sanitize_thread-'))
+    shell: bash
+    run: |
+      echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fsanitize=thread"' >> env.sh
+      echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fsanitize=thread"' >> env.sh
+
   - name: Setup lcov (Linux)
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-'))
     shell: bash
