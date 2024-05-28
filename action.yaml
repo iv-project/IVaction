@@ -259,12 +259,20 @@ runs:
       cmake .
       make CPM_CHECK_NEWER_PACKAGES
 
+  - name: cpm_version_check_inline (Linux)
+    if: runner.os == 'Linux' && inputs.compiler == 'cpm_version_check_inline'
+    shell: bash
+    run: |
+      source env.sh
+      mkdir -p repo/build && cd $_
+      cmake .. -DCPM_CHECK_VERSION_ENABLED=TRUE ${{ inputs.cmake_flags }}
+      make CPM_CHECK_NEWER_PACKAGES
+
   - name: REUSE Compliance Check
     if: ${{ inputs.compiler == 'spdx_license_lint' }}
     uses: fsfe/reuse-action@v3
     with:
       args: --suppress-deprecation --root repo lint
-
 
   - name: Tool versions (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'

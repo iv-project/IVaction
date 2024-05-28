@@ -45,6 +45,7 @@ Each take following arguments:
     - `sanitize_thread` - activates thread sanitizer flags
     - `lcov` - generates and uploads code coverage data (linux)
     - `cpm_version_check` - checks if CPM and the dependencies are the newest version (linux)
+    - `cpm_version_check_inline` - check if CPM and the dependencies are the newest version by calling CPM_CHECK_VERSION target (linux)
     - `spdx_license_lint` - checks if all files follow spdx header licensing (linux)
 
 - `cmake_flags` (optional, default: "") \
