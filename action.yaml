@@ -83,6 +83,9 @@ runs:
       echo "export CXX=g++-11" >> env.sh
       echo "export CC=gcc-11" >> env.sh
       echo "export GCOV=gcov-11" >> env.sh
+
+      #Only needed for macos
+      echo "export SDKROOT=$(gcc-11 -v 2>&1 | sed -n 's@.*--with-sysroot=\([^ ]*\).*@\1@p')" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup gcc 12 (Linux, macOS)
@@ -95,6 +98,9 @@ runs:
       echo "export CXX=g++-12" >> env.sh
       echo "export CC=gcc-12" >> env.sh
       echo "export GCOV=gcov-12" >> env.sh
+
+      #Only needed for macos
+      echo "export SDKROOT=$(gcc-12 -v 2>&1 | sed -n 's@.*--with-sysroot=\([^ ]*\).*@\1@p')" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup gcc 13 (Linux, macOS)
@@ -107,6 +113,9 @@ runs:
       echo "export CXX=g++-13" >> env.sh
       echo "export CC=gcc-13" >> env.sh
       echo "export GCOV=gcov-13" >> env.sh
+
+      #Only needed for macos
+      echo "export SDKROOT=$(gcc-13 -v 2>&1 | sed -n 's@.*--with-sysroot=\([^ ]*\).*@\1@p')" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup gcc 14 (Linux, macOS)
@@ -119,6 +128,9 @@ runs:
       echo "export CXX=g++-14" >> env.sh
       echo "export CC=gcc-14" >> env.sh
       echo "export GCOV=gcov-14" >> env.sh
+
+      #Only needed for macos
+      echo "export SDKROOT=$(gcc-14 -v 2>&1 | sed -n 's@.*--with-sysroot=\([^ ]*\).*@\1@p')" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup clang 15 (Linux, macOS)
@@ -304,6 +316,7 @@ runs:
     run: |
       source env.sh
       cmake --version
+      echo "SDKROOT: ${SDKROOT}"
       ${CXX:-echo} --version
   - name: Configure tests (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
