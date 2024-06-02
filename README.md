@@ -10,7 +10,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 ## Synopsis
 ```
-      - uses: iv-project/IVaction@v9.9
+      - uses: iv-project/IVaction@v9.11
         with:
           compiler: gcc12-cpp20-debug
 ```
@@ -19,7 +19,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 For each OS it provides a custom action:
 
-- iv-project/IVaction@v9.9
+- iv-project/IVaction@v9.11
 
 Each take following arguments:
 - `compiler` (required) \
@@ -34,6 +34,7 @@ Each take following arguments:
     - `clang17` - selects clang 17 (linux and macos)
     - `msvc` - selects msvc (windows)
     - `intel` - selects intels llvm compiler (linux)
+    - `emscripten` - selects emscripten as compiler (linux)
     - `cpp17` - requests c++17
     - `cpp20` - requests c++20
     - `cpp23` - requests c++23
@@ -50,6 +51,10 @@ Each take following arguments:
 
 - `cmake_flags` (optional, default: "") \
     additional cmake flags
+- `cmake_c_flags` (optional, default: "") \
+    additional `CMAKE_C_FLAGS`
+- `cmake_cxx_flags` (optional, default: "") \
+    additional `CMAKE_CXX_FLAGS`
 - `threads`: (optional, default: 1) \
     number of threads to use
 - `codecov_token`: (optional, default: "") \
@@ -98,7 +103,7 @@ jobs:
           - {os: macos-12, compiler: clang17-cpp20-release}
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction@v9.5 # make sure this is the newest version
+        uses: iv-project/IVaction@v9.11 # make sure this is the newest version
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2

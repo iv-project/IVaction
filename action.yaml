@@ -11,6 +11,14 @@ inputs:
     description: "additional cmake flags"
     required: false
     default: ""
+  cmake_c_flags:
+    description: "additional CMAKE_C_FLAGS"
+    required: false
+    default: ""
+  cmake_cxx_flags:
+    description: "additional CMAKE_CXX_FLAGS"
+    required: false
+    default: ""
   threads:
     description: "number of threads to use"
     required: false
@@ -39,8 +47,8 @@ runs:
        echo "Setup for " ${{ inputs.compiler }}
        echo "export CXX_STANDARD=20" > env.sh
        echo "export BUILD_TYPE=Release" >> env.sh
-       echo "export CMAKE_CXX_FLAGS=" >> env.sh
-       echo "export CMAKE_C_FLAGS=" >> env.sh
+       echo "export CMAKE_CXX_FLAGS=${{ inputs.cmake_cxx_flags }}" >> env.sh
+       echo "export CMAKE_C_FLAGS=${{ inputs.cmake_c_flags }}" >> env.sh
        echo "export GCOV=gcov" >> env.sh
        echo "MODE=unknown" >> "$GITHUB_ENV"
 
@@ -75,6 +83,9 @@ runs:
       echo "export CXX=g++-11" >> env.sh
       echo "export CC=gcc-11" >> env.sh
       echo "export GCOV=gcov-11" >> env.sh
+
+      #Only needed for macos
+      echo "export SDKROOT=$(gcc-11 -v 2>&1 | sed -n 's@.*--with-sysroot=\([^ ]*\).*@\1@p')" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup gcc 12 (Linux, macOS)
@@ -87,6 +98,9 @@ runs:
       echo "export CXX=g++-12" >> env.sh
       echo "export CC=gcc-12" >> env.sh
       echo "export GCOV=gcov-12" >> env.sh
+
+      #Only needed for macos
+      echo "export SDKROOT=$(gcc-12 -v 2>&1 | sed -n 's@.*--with-sysroot=\([^ ]*\).*@\1@p')" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup gcc 13 (Linux, macOS)
@@ -99,6 +113,9 @@ runs:
       echo "export CXX=g++-13" >> env.sh
       echo "export CC=gcc-13" >> env.sh
       echo "export GCOV=gcov-13" >> env.sh
+
+      #Only needed for macos
+      echo "export SDKROOT=$(gcc-13 -v 2>&1 | sed -n 's@.*--with-sysroot=\([^ ]*\).*@\1@p')" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup gcc 14 (Linux, macOS)
@@ -111,6 +128,9 @@ runs:
       echo "export CXX=g++-14" >> env.sh
       echo "export CC=gcc-14" >> env.sh
       echo "export GCOV=gcov-14" >> env.sh
+
+      #Only needed for macos
+      echo "export SDKROOT=$(gcc-14 -v 2>&1 | sed -n 's@.*--with-sysroot=\([^ ]*\).*@\1@p')" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup clang 15 (Linux, macOS)
@@ -175,6 +195,21 @@ runs:
       echo "CXX=icpx" >> "${GITHUB_ENV}"
       echo "MODE=compile" >> "$GITHUB_ENV"
 
+  - name: Setup emscripten
+    if: (runner.os == 'Linux') && (startsWith(inputs.compiler, 'emscripten-') || (inputs.compiler == 'emscripten'))
+    shell: bash
+    run: |
+      source env.sh
+      git clone https://github.com/emscripten-core/emsdk.git
+      (
+        cd emsdk
+        git pull
+        ./emsdk install latest
+        ./emsdk activate latest
+      )
+      echo "source emsdk/emsdk_env.sh" >> env.sh
+      echo "export CMAKE_LAUNCHER=emcmake" >> env.sh
+      echo "MODE=compile" >> "${GITHUB_ENV}"
 
   - name: Setup c++17
     if: ${{ endsWith(inputs.compiler, '-cpp17') || contains(inputs.compiler, '-cpp17-') }}
@@ -249,6 +284,7 @@ runs:
       echo "export BUILD_TYPE=Debug" >> env.sh
       echo "export CMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS} --coverage\"" >> env.sh
       echo "export CMAKE_C_FLAGS=\"${CMAKE_C_FLAGS} --coverage\"" >> env.sh
+
   - name: cpm_version_check (Linux)
     if: runner.os == 'Linux' && inputs.compiler == 'cpm_version_check'
     shell: bash
@@ -280,14 +316,15 @@ runs:
     run: |
       source env.sh
       cmake --version
-      ${CXX} --version
+      echo "SDKROOT: ${SDKROOT}"
+      ${CXX:-echo} --version
   - name: Configure tests (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
     shell: bash
     run: |
       source env.sh
       mkdir -p repo/build && cd $_
-      cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
+      ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
   - name: Build tests (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
     shell: bash
