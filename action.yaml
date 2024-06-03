@@ -229,7 +229,6 @@ runs:
     run: |
       echo "export CXX_STANDARD=23" >> env.sh
 
-
   - name: Setup release
     if: ${{ endsWith(inputs.compiler, '-release') || contains(inputs.compiler, '-release-') }}
     shell: bash
@@ -318,6 +317,7 @@ runs:
       cmake --version
       echo "SDKROOT: ${SDKROOT}"
       ${CXX:-echo} --version
+
   - name: Configure tests (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
     shell: bash
@@ -325,6 +325,7 @@ runs:
       source env.sh
       mkdir -p repo/build && cd $_
       ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
+
   - name: Build tests (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
     shell: bash
@@ -332,6 +333,7 @@ runs:
       source env.sh
       cd repo/build
       make -k -j ${{ inputs.threads }} VERBOSE=1
+
   - name: Generate base coverage
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-'))
     shell: bash
@@ -342,12 +344,13 @@ runs:
       lcov -c -i --directory . --output coverage_base.info --gcov ${GCOV} --base-directory ..
 
   - name: Run tests (Linux, macOS)
-    if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
+    if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile' && !endswith(inputs.compiler, '-notests') && !contains(inputs.compiler, '-notests-')
     shell: bash
     run: |
       source env.sh
       cd repo/build
       ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} || ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} --rerun-failed
+
   - name: Generate Coverage report and upload (Linux)
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-'))
     shell: bash
@@ -368,6 +371,7 @@ runs:
         export CODECOV="-t ${{ inputs.codecov_token }}"
       fi
       ./codecov ${CODECOV:-} -f coverage.info -B ${{ github.ref_name }}
+
   - name: Load MSVC Tools (Windows)
     uses: ilammy/msvc-dev-cmd@v1
     if: (runner.os == 'Windows')
@@ -380,8 +384,9 @@ runs:
       mkdir -p repo/build && cd $_
       cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
       nmake VERBOSE=1
+
   - name: Run tests (Windows)
-    if: (runner.os == 'Windows')
+    if: runner.os == 'Windows' && !endswith(inputs.compiler, '-notests') && !contains(inputs.compiler, '-notests-')
     shell: bash
     run: |
       cd repo/build

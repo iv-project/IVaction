@@ -10,7 +10,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 ## Synopsis
 ```
-      - uses: iv-project/IVaction@v9.11
+      - uses: iv-project/IVaction@v9.12
         with:
           compiler: gcc12-cpp20-debug
 ```
@@ -19,7 +19,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 For each OS it provides a custom action:
 
-- iv-project/IVaction@v9.11
+- iv-project/IVaction@v9.12
 
 Each take following arguments:
 - `compiler` (required) \
@@ -48,6 +48,7 @@ Each take following arguments:
     - `cpm_version_check` - checks if CPM and the dependencies are the newest version (linux)
     - `cpm_version_check_inline` - check if CPM and the dependencies are the newest version by calling CPM_CHECK_VERSION target (linux)
     - `spdx_license_lint` - checks if all files follow spdx header licensing (linux)
+    - `notests` - will not run any ctests
 
 - `cmake_flags` (optional, default: "") \
     additional cmake flags
@@ -103,7 +104,7 @@ jobs:
           - {os: macos-12, compiler: clang17-cpp20-release}
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction@v9.11 # make sure this is the newest version
+        uses: iv-project/IVaction@v9.12 # make sure this is the newest version
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
