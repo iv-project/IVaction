@@ -359,7 +359,7 @@ runs:
     run: |
       source env.sh
       cd repo/build
-      ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} || ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} --rerun-failed
+      ctest --verbose . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} || ctest --verbose . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} --rerun-failed
 
   - name: Generate Coverage report and upload (Linux)
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-'))
@@ -400,4 +400,4 @@ runs:
     shell: bash
     run: |
       cd repo/build
-      ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }}
+      ctest --verbose . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }}
