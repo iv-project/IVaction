@@ -245,6 +245,16 @@ runs:
         echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fno-omit-frame-pointer"' >> env.sh
       fi
 
+  - name: Setup RelWithDebInfo
+    if: endsWith(inputs.compiler, '-relwithdebinfo') || contains(inputs.compiler, '-relwithdebinfo-')
+    shell: bash
+    run: |
+      echo "export BUILD_TYPE=RelWithDebInfo" >> env.sh
+      if [ "${RUNNER_OS}" != "Windows" ]; then
+        echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer"' >> env.sh
+        echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fno-omit-frame-pointer"' >> env.sh
+      fi
+
   - name: Setup Strict (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (endsWith(inputs.compiler, '-strict') || contains(inputs.compiler, '-strict-'))
     shell: bash

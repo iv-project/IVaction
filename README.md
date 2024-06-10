@@ -40,6 +40,7 @@ Each take following arguments:
     - `cpp23` - requests c++23
     - `release` - sets cmake build type to release
     - `debug` - sets cmake build type to debug
+    - `relwithdebinfo` - sets cmake build type to relwithdebinfo
     - `strict` - activates stricter compiler flags (linux and macos)
     - `sanitize_address` - activates address sanitizer flags
     - `sanitize_undefined` - activates undefined behaviour sanitizer flags
