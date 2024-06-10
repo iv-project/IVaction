@@ -255,12 +255,17 @@ runs:
         echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fno-omit-frame-pointer"' >> env.sh
       fi
 
-  - name: Setup Strict (Linux, macOS)
-    if: (runner.os == 'Linux' || runner.os == 'macOS') && (endsWith(inputs.compiler, '-strict') || contains(inputs.compiler, '-strict-'))
+  - name: Setup Strict
+    if: endsWith(inputs.compiler, '-strict') || contains(inputs.compiler, '-strict-')
     shell: bash
     run: |
-      echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wall -Werror -Wpedantic -Wextra"' >> env.sh
-      echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wall -Werror -Wpedantic -Wextra"' >> env.sh
+      if [ "${RUNNER_OS}" == "Windows" ]; then
+        echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /Wall /WX"' >> env.sh
+        echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} /Wall /WX"' >> env.sh
+      else
+        echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wall -Werror -Wpedantic -Wextra"' >> env.sh
+        echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wall -Werror -Wpedantic -Wextra"' >> env.sh
+      fi
 
   - name: Setup Sanitize Address (Linux)
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-sanitize_address') || contains(inputs.compiler, '-sanitize_address-'))

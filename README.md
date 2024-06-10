@@ -41,7 +41,7 @@ Each take following arguments:
     - `release` - sets cmake build type to release
     - `debug` - sets cmake build type to debug
     - `relwithdebinfo` - sets cmake build type to relwithdebinfo
-    - `strict` - activates stricter compiler flags (linux and macos)
+    - `strict` - activates stricter compiler flags
     - `sanitize_address` - activates address sanitizer flags
     - `sanitize_undefined` - activates undefined behaviour sanitizer flags
     - `sanitize_thread` - activates thread sanitizer flags
