@@ -32,6 +32,7 @@ Each take following arguments:
     - `clang15` - selects clang 15 (linux and macos)
     - `clang16` - selects clang 16 (linux and macos)
     - `clang17` - selects clang 17 (linux and macos)
+    - `clang18` - selects clang 18 (linux and macos)
     - `msvc` - selects msvc (windows)
     - `intel` - selects intels llvm compiler (linux)
     - `emscripten` - selects emscripten as compiler (linux)
