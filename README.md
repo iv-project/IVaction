@@ -10,7 +10,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 ## Synopsis
 ```
-      - uses: iv-project/IVaction@v9.12
+      - uses: iv-project/IVaction@v9.13
         with:
           compiler: gcc12-cpp20-debug
 ```
@@ -19,7 +19,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 For each OS it provides a custom action:
 
-- iv-project/IVaction@v9.12
+- iv-project/IVaction@v9.13
 
 Each take following arguments:
 - `compiler` (required) \
@@ -42,9 +42,9 @@ Each take following arguments:
     - `debug` - sets cmake build type to debug
     - `relwithdebinfo` - sets cmake build type to relwithdebinfo
     - `strict` - activates stricter compiler flags
-    - `sanitize_address` - activates address sanitizer flags
-    - `sanitize_undefined` - activates undefined behaviour sanitizer flags
-    - `sanitize_thread` - activates thread sanitizer flags
+    - `sanitize_address` - activates address sanitizer flags (linux and windows)
+    - `sanitize_undefined` - activates undefined behaviour sanitizer flags (linux)
+    - `sanitize_thread` - activates thread sanitizer flags (linux)
     - `lcov` - generates and uploads code coverage data (linux)
     - `cpm_version_check` - checks if CPM and the dependencies are the newest version (linux)
     - `cpm_version_check_inline` - check if CPM and the dependencies are the newest version by calling CPM_CHECK_VERSION target (linux)
@@ -105,7 +105,7 @@ jobs:
           - {os: macos-12, compiler: clang17-cpp20-release}
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction@v9.12 # make sure this is the newest version
+        uses: iv-project/IVaction@v9.13 # make sure this is the newest version
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2

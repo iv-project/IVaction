@@ -47,8 +47,8 @@ runs:
        echo "Setup for " ${{ inputs.compiler }}
        echo "export CXX_STANDARD=20" > env.sh
        echo "export BUILD_TYPE=Release" >> env.sh
-       echo "export CMAKE_CXX_FLAGS=${{ inputs.cmake_cxx_flags }}" >> env.sh
-       echo "export CMAKE_C_FLAGS=${{ inputs.cmake_c_flags }}" >> env.sh
+       echo "export CMAKE_CXX_FLAGS='${{ inputs.cmake_cxx_flags }}'" >> env.sh
+       echo "export CMAKE_C_FLAGS='${{ inputs.cmake_c_flags }}'" >> env.sh
        echo "export GCOV=gcov" >> env.sh
        echo "MODE=unknown" >> "$GITHUB_ENV"
 
@@ -346,7 +346,7 @@ runs:
     run: |
       source env.sh
       mkdir -p repo/build && cd $_
-      ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
+      ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
 
   - name: Build tests (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
@@ -404,7 +404,7 @@ runs:
     run: |
       source env.sh
       mkdir -p repo/build && cd $_
-      cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
+      cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
       nmake VERBOSE=1
 
   - name: Run tests (Windows)
