@@ -175,6 +175,20 @@ runs:
       echo "export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++\"" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
+  - name: Setup clang 18 (Linux, macOS)
+    if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'clang18-') || (inputs.compiler == 'clang18'))
+    shell: bash
+    run: |
+      source env.sh
+      brew install --force-bottle llvm@18
+      brew link -f llvm@18
+      echo "export CXX=clang++" >> env.sh
+      echo "export CC=clang" >> env.sh
+      INSTALL_PREFIX=$(brew --prefix llvm@18)
+      echo "export PATH=\"${INSTALL_PREFIX}/bin:$PATH\"" >> env.sh
+      echo "export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++\"" >> env.sh
+      echo "MODE=compile" >> "$GITHUB_ENV"
+
   - name: Setup intel (Linux)
     if: (runner.os == 'Linux') && (startsWith(inputs.compiler, 'intel-') || (inputs.compiler == 'intel'))
     shell: bash
