@@ -47,8 +47,8 @@ runs:
        echo "Setup for " ${{ inputs.compiler }}
        echo "export CXX_STANDARD=20" > env.sh
        echo "export BUILD_TYPE=Release" >> env.sh
-       echo "export CMAKE_CXX_FLAGS=${{ inputs.cmake_cxx_flags }}" >> env.sh
-       echo "export CMAKE_C_FLAGS=${{ inputs.cmake_c_flags }}" >> env.sh
+       echo "export CMAKE_CXX_FLAGS='${{ inputs.cmake_cxx_flags }}'" >> env.sh
+       echo "export CMAKE_C_FLAGS='${{ inputs.cmake_c_flags }}'" >> env.sh
        echo "export GCOV=gcov" >> env.sh
        echo "MODE=unknown" >> "$GITHUB_ENV"
 
@@ -245,12 +245,27 @@ runs:
         echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fno-omit-frame-pointer"' >> env.sh
       fi
 
-  - name: Setup Strict (Linux, macOS)
-    if: (runner.os == 'Linux' || runner.os == 'macOS') && (endsWith(inputs.compiler, '-strict') || contains(inputs.compiler, '-strict-'))
+  - name: Setup RelWithDebInfo
+    if: endsWith(inputs.compiler, '-relwithdebinfo') || contains(inputs.compiler, '-relwithdebinfo-')
     shell: bash
     run: |
-      echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wall -Werror -Wpedantic -Wextra"' >> env.sh
-      echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wall -Werror -Wpedantic -Wextra"' >> env.sh
+      echo "export BUILD_TYPE=RelWithDebInfo" >> env.sh
+      if [ "${RUNNER_OS}" != "Windows" ]; then
+        echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer"' >> env.sh
+        echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fno-omit-frame-pointer"' >> env.sh
+      fi
+
+  - name: Setup Strict
+    if: endsWith(inputs.compiler, '-strict') || contains(inputs.compiler, '-strict-')
+    shell: bash
+    run: |
+      if [ "${RUNNER_OS}" == "Windows" ]; then
+        echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /Wall /WX"' >> env.sh
+        echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} /Wall /WX"' >> env.sh
+      else
+        echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wall -Werror -Wpedantic -Wextra"' >> env.sh
+        echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -Wall -Werror -Wpedantic -Wextra"' >> env.sh
+      fi
 
   - name: Setup Sanitize Address (Linux)
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-sanitize_address') || contains(inputs.compiler, '-sanitize_address-'))
@@ -272,6 +287,13 @@ runs:
     run: |
       echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fsanitize=thread"' >> env.sh
       echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fsanitize=thread"' >> env.sh
+
+  - name: Setup Sanitize Thread (Windows)
+    if: runner.os == 'Windows' && (endsWith(inputs.compiler, '-sanitize_thread') || contains(inputs.compiler, '-sanitize_thread-'))
+    shell: bash
+    run: |
+      echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /fsanitize=address"' >> env.sh
+      echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} /fsanitize=address"' >> env.sh
 
   - name: Setup lcov (Linux)
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-'))
@@ -324,7 +346,7 @@ runs:
     run: |
       source env.sh
       mkdir -p repo/build && cd $_
-      ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
+      ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
 
   - name: Build tests (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
@@ -349,7 +371,7 @@ runs:
     run: |
       source env.sh
       cd repo/build
-      ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} || ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} --rerun-failed
+      ctest --verbose . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} || ctest --verbose . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} --rerun-failed
 
   - name: Generate Coverage report and upload (Linux)
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-'))
@@ -382,7 +404,9 @@ runs:
     run: |
       source env.sh
       mkdir -p repo/build && cd $_
-      cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
+      echo cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
+      cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
+      echo nmake VERBOSE=1
       nmake VERBOSE=1
 
   - name: Run tests (Windows)
@@ -390,4 +414,4 @@ runs:
     shell: bash
     run: |
       cd repo/build
-      ctest . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }}
+      ctest --verbose . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }}
