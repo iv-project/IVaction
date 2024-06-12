@@ -10,7 +10,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 ## Synopsis
 ```
-      - uses: iv-project/IVaction@v9.13
+      - uses: iv-project/IVaction@v9.14
         with:
           compiler: gcc12-cpp20-debug
 ```
@@ -19,7 +19,7 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 For each OS it provides a custom action:
 
-- iv-project/IVaction@v9.13
+- iv-project/IVaction@v9.14
 
 Each take following arguments:
 - `compiler` (required) \
@@ -106,7 +106,7 @@ jobs:
           - {os: macos-12, compiler: clang17-cpp20-release}
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction@v9.13 # make sure this is the newest version
+        uses: iv-project/IVaction@v9.14 # make sure this is the newest version
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
