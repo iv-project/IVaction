@@ -31,6 +31,10 @@ inputs:
     description: "ctest timeout value in seconds"
     required: false
     default: 7200
+  age_of_last_commit:
+    description: "warn if HEAD is old and has no tag (in days)"
+    required: false
+    default: 7
 
 runs:
   using: 'composite'
@@ -43,17 +47,39 @@ runs:
   - name: Initialize environment
     shell: bash
     run: |
-       echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
-       echo "Setup for " ${{ inputs.compiler }}
-       echo "export CXX_STANDARD=20" > env.sh
-       echo "export BUILD_TYPE=Release" >> env.sh
-       echo "export CMAKE_CXX_FLAGS='${{ inputs.cmake_cxx_flags }}'" >> env.sh
-       echo "export CMAKE_C_FLAGS='${{ inputs.cmake_c_flags }}'" >> env.sh
-       echo "export GCOV=gcov" >> env.sh
-       echo "MODE=unknown" >> "$GITHUB_ENV"
+      echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
+      echo "Setup for " ${{ inputs.compiler }}
+      echo "export CXX_STANDARD=20" > env.sh
+      echo "export BUILD_TYPE=Release" >> env.sh
+      echo "export CMAKE_CXX_FLAGS='${{ inputs.cmake_cxx_flags }}'" >> env.sh
+      echo "export CMAKE_C_FLAGS='${{ inputs.cmake_c_flags }}'" >> env.sh
+      echo "export GCOV=gcov" >> env.sh
+      echo "MODE=unknown" >> "$GITHUB_ENV"
+
+  - name: Check if tagged
+    if: runner.os == 'Linux' && inputs.compiler == 'check_tag'
+    shell: bash
+    run: |
+      last_commit=$(expr $(expr $(date +%s) - $(git log -1 --format=%at HEAD | cat)) / 86400)
+      if [ ${last_commit} -ge ${{ input.age_of_last_commit }} ]; then
+        git describe --tags --exact-match HEAD
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi
+      fi
+      echo "MODE=notools" >> "$GITHUB_ENV"
+
+  - name: REUSE Compliance Check
+    if: ${{ inputs.compiler == 'spdx_license_lint' }}
+    uses: fsfe/reuse-action@v3
+    with:
+      args: --suppress-deprecation --root repo lint
+    shell: bash
+    run: |
+      echo "MODE=notools" >> "$GITHUB_ENV"
 
   - name: Install tools (Linux)
-    if: runner.os == 'Linux'
+    if: runner.os == 'Linux' && env.MODE == 'unknown'
     shell: bash
     run: |
       source env.sh
@@ -68,10 +94,10 @@ runs:
     if: runner.os == 'macOS'
     shell: bash
     run: |
-       source env.sh
-       echo 'eval "$(brew shellenv)"' >> env.sh
-       brew update-reset
-       brew install --force-bottle --overwrite cmake pkg-config bash
+      source env.sh
+      echo 'eval "$(brew shellenv)"' >> env.sh
+      brew update-reset
+      brew install --force-bottle --overwrite cmake pkg-config bash
 
   - name: Setup gcc 11 (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'gcc11-') || (inputs.compiler == 'gcc11'))
@@ -339,12 +365,6 @@ runs:
       cmake .. -DCPM_CHECK_VERSION_ENABLED=TRUE ${{ inputs.cmake_flags }}
       make CPM_CHECK_NEWER_PACKAGES
 
-  - name: REUSE Compliance Check
-    if: ${{ inputs.compiler == 'spdx_license_lint' }}
-    uses: fsfe/reuse-action@v3
-    with:
-      args: --suppress-deprecation --root repo lint
-
   - name: Tool versions (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
     shell: bash
@@ -429,3 +449,10 @@ runs:
     run: |
       cd repo/build
       ctest --verbose . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }}
+
+  - name: Open Issue
+    if: endsWith(inputs.compiler, '-open_issue') || contains(inputs.compiler, '-open_issue-'))
+    uses: jayqi/failed-build-issue-action@v1.2.0
+    if: failure()
+    with:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
