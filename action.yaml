@@ -48,6 +48,7 @@ runs:
     with:
       path: repo
       submodules: recursive
+      fetch-tags: true
   - name: Initialize environment
     shell: bash
     run: |
