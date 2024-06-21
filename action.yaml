@@ -52,6 +52,7 @@ runs:
   - name: Initialize environment
     shell: bash
     run: |
+      echo "## Initialize environment"
       echo \"${GITHUB_ACTION}\" \"${GITHUB_REF}\" \"${GITHUB_BASE_REF}\" \"${GITHUB_RUN_NUMBER}\"
       echo "Setup for " ${{ inputs.compiler }}
       echo "export CXX_STANDARD=20" > env.sh
@@ -65,6 +66,7 @@ runs:
     if: runner.os == 'Linux' && (inputs.compiler == 'check_tag' || startsWith(inputs.compiler, 'check_tag-') || endsWith(inputs.compiler, '-check_tag') || contains(inputs.compiler, '-check_tag-'))
     shell: bash
     run: |
+      echo "## Check if tagged"
       echo "MODE=notools" >> "$GITHUB_ENV"
       cd repo
       date --help
@@ -92,6 +94,7 @@ runs:
     if: ${{ inputs.compiler == 'spdx_license_lint' }}
     shell: bash
     run: |
+      echo "## REUSE Compliance Check - Mode"
       echo "MODE=notools" >> "$GITHUB_ENV"
 
   - name: REUSE Compliance Check
@@ -104,6 +107,7 @@ runs:
     if: runner.os == 'Linux' && env.MODE == 'unknown'
     shell: bash
     run: |
+      echo "## Install tools (Linux)"
       source env.sh
       NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -116,6 +120,7 @@ runs:
     if: runner.os == 'macOS'
     shell: bash
     run: |
+      echo "## Install tools (macOS)"
       source env.sh
       echo 'eval "$(brew shellenv)"' >> env.sh
       brew update-reset
@@ -125,6 +130,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'gcc11-') || (inputs.compiler == 'gcc11'))
     shell: bash
     run: |
+      echo "## Setup gcc 11 (Linux, macOS)"
       source env.sh
       brew install --force-bottle gcc@11
       brew link -f gcc@11
@@ -140,6 +146,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'gcc12-') || (inputs.compiler == 'gcc12'))
     shell: bash
     run: |
+      echo "## Setup gcc 12 (Linux, macOS)"
       source env.sh
       brew install --force-bottle gcc@12
       brew link -f gcc@12
@@ -155,6 +162,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'gcc13-') || (inputs.compiler == 'gcc13'))
     shell: bash
     run: |
+      echo "## Setup gcc 13 (Linux, macOS)"
       source env.sh
       brew install --force-bottle gcc@13
       brew link -f gcc@13
@@ -170,6 +178,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'gcc14-') || (inputs.compiler == 'gcc14'))
     shell: bash
     run: |
+      echo "## Setup gcc 14 (Linux, macOS)"
       source env.sh
       brew install --force-bottle gcc@14
       brew link -f gcc@14
@@ -185,6 +194,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'clang15-') || (inputs.compiler == 'clang15'))
     shell: bash
     run: |
+      echo "## Setup clang 15 (Linux, macOS)"
       source env.sh
       brew install --force-bottle llvm@15
       brew link -f llvm@15
@@ -199,6 +209,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'clang16-') || (inputs.compiler == 'clang16'))
     shell: bash
     run: |
+      echo "## Setup clang 16 (Linux, macOS)"
       source env.sh
       brew install --force-bottle llvm@16
       brew link -f llvm@16
@@ -213,6 +224,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'clang17-') || (inputs.compiler == 'clang17'))
     shell: bash
     run: |
+      echo "## Setup clang 17 (Linux, macOS)"
       source env.sh
       brew install --force-bottle llvm@17
       brew link -f llvm@17
@@ -227,6 +239,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'clang18-') || (inputs.compiler == 'clang18'))
     shell: bash
     run: |
+      echo "## Setup clang 18 (Linux, macOS)"
       source env.sh
       brew install --force-bottle llvm@18
       brew link -f llvm@18
@@ -241,6 +254,7 @@ runs:
     if: (runner.os == 'Linux') && (startsWith(inputs.compiler, 'intel-') || (inputs.compiler == 'intel'))
     shell: bash
     run: |
+      echo "## Setup intel (Linux)"
       source env.sh
       wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
       sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
@@ -261,6 +275,7 @@ runs:
     if: (runner.os == 'Linux') && (startsWith(inputs.compiler, 'emscripten-') || (inputs.compiler == 'emscripten'))
     shell: bash
     run: |
+      echo "## Setup emscripten"
       source env.sh
       git clone https://github.com/emscripten-core/emsdk.git
       (
@@ -277,30 +292,35 @@ runs:
     if: ${{ endsWith(inputs.compiler, '-cpp17') || contains(inputs.compiler, '-cpp17-') }}
     shell: bash
     run: |
+      echo "## Setup c++17"
       echo "export CXX_STANDARD=17" >> env.sh
 
   - name: Setup c++20
     if: ${{ endsWith(inputs.compiler, '-cpp20') || contains(inputs.compiler, '-cpp20-') }}
     shell: bash
     run: |
+      echo "## Setup c++20"
       echo "export CXX_STANDARD=20" >> env.sh
 
   - name: Setup c++23
     if: ${{ endsWith(inputs.compiler, '-cpp23') || contains(inputs.compiler, '-cpp23-') }}
     shell: bash
     run: |
+      echo "## Setup c++23"
       echo "export CXX_STANDARD=23" >> env.sh
 
-  - name: Setup release
+  - name: Setup Release
     if: ${{ endsWith(inputs.compiler, '-release') || contains(inputs.compiler, '-release-') }}
     shell: bash
     run: |
+      echo "## Setup Release"
       echo "export BUILD_TYPE=Release" >> env.sh
 
   - name: Setup Debug
     if: endsWith(inputs.compiler, '-debug') || contains(inputs.compiler, '-debug-')
     shell: bash
     run: |
+      echo "## Setup Debug"
       echo "export BUILD_TYPE=Debug" >> env.sh
       if [ "${RUNNER_OS}" != "Windows" ]; then
         echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer"' >> env.sh
@@ -311,6 +331,7 @@ runs:
     if: endsWith(inputs.compiler, '-relwithdebinfo') || contains(inputs.compiler, '-relwithdebinfo-')
     shell: bash
     run: |
+      echo "## Setup RelWithDebInfo"
       echo "export BUILD_TYPE=RelWithDebInfo" >> env.sh
       if [ "${RUNNER_OS}" != "Windows" ]; then
         echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer"' >> env.sh
@@ -321,6 +342,7 @@ runs:
     if: endsWith(inputs.compiler, '-strict') || contains(inputs.compiler, '-strict-')
     shell: bash
     run: |
+      echo "## Setup Strict"
       if [ "${RUNNER_OS}" == "Windows" ]; then
         echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /Wall /WX"' >> env.sh
         echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} /Wall /WX"' >> env.sh
@@ -333,6 +355,7 @@ runs:
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-sanitize_address') || contains(inputs.compiler, '-sanitize_address-'))
     shell: bash
     run: |
+      echo "## Setup Sanitize Address (Linux)"
       echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fsanitize=address"' >> env.sh
       echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fsanitize=address"' >> env.sh
 
@@ -340,6 +363,7 @@ runs:
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-sanitize_undefined') || contains(inputs.compiler, '-sanitize_undefined-'))
     shell: bash
     run: |
+      echo "## Setup Sanitize Undefined Behavior (Linux)"
       echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fsanitize=undefined"' >> env.sh
       echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fsanitize=undefined"' >> env.sh
 
@@ -347,6 +371,7 @@ runs:
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-sanitize_thread') || contains(inputs.compiler, '-sanitize_thread-'))
     shell: bash
     run: |
+      echo "## Setup Sanitize Thread (Linux)"
       echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fsanitize=thread"' >> env.sh
       echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fsanitize=thread"' >> env.sh
 
@@ -354,6 +379,7 @@ runs:
     if: runner.os == 'Windows' && (endsWith(inputs.compiler, '-sanitize_thread') || contains(inputs.compiler, '-sanitize_thread-'))
     shell: bash
     run: |
+      echo "## Setup Sanitize Thread (Windows)"
       echo 'export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /fsanitize=address"' >> env.sh
       echo 'export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} /fsanitize=address"' >> env.sh
 
@@ -361,6 +387,7 @@ runs:
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-'))
     shell: bash
     run: |
+      echo "## Setup lcov (Linux)"
       source env.sh
       sudo apt-get install lcov
       lcov --version
@@ -372,6 +399,7 @@ runs:
     if: runner.os == 'Linux' && inputs.compiler == 'cpm_version_check'
     shell: bash
     run: |
+      echo "## cpm_version_check (Linux)"
       source env.sh
       cp -r "${{ github.action_path }}"/cpm_check_version .
       cd cpm_check_version
@@ -382,6 +410,7 @@ runs:
     if: runner.os == 'Linux' && inputs.compiler == 'cpm_version_check_inline'
     shell: bash
     run: |
+      echo "## cpm_version_check_inline (Linux)"
       source env.sh
       mkdir -p repo/build && cd $_
       cmake .. -DCPM_CHECK_VERSION_ENABLED=TRUE ${{ inputs.cmake_flags }}
@@ -391,6 +420,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
     shell: bash
     run: |
+      echo "## Tool versions (Linux, macOS)"
       source env.sh
       cmake --version
       echo "SDKROOT: ${SDKROOT}"
@@ -400,6 +430,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
     shell: bash
     run: |
+      echo "## Configure tests (Linux, macOS)"
       source env.sh
       mkdir -p repo/build && cd $_
       ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
@@ -408,6 +439,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
     shell: bash
     run: |
+      echo "## Build tests (Linux, macOS)"
       source env.sh
       cd repo/build
       make -k -j ${{ inputs.threads }} VERBOSE=1
@@ -416,6 +448,7 @@ runs:
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-'))
     shell: bash
     run: |
+      echo "## Generate base coverage"
       source env.sh
       cd repo/build
       echo ${GCOV}
@@ -425,6 +458,7 @@ runs:
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile' && !endswith(inputs.compiler, '-notests') && !contains(inputs.compiler, '-notests-')
     shell: bash
     run: |
+      echo "## Run tests (Linux, macOS)"
       source env.sh
       cd repo/build
       ctest --verbose . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} || ctest --verbose . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }} --rerun-failed
@@ -433,6 +467,7 @@ runs:
     if: runner.os == 'Linux' && (endsWith(inputs.compiler, '-lcov') || contains(inputs.compiler, '-lcov-'))
     shell: bash
     run: |
+      echo "## Generate Coverage report and upload (Linux)"
       source env.sh
       cd repo/build
       lcov -c --directory . --output coverage_test.info --gcov ${GCOV} --base-directory ..
@@ -458,6 +493,7 @@ runs:
     if: (runner.os == 'Windows')
     shell: bash
     run: |
+      echo "## Build something requiring CL.EXE (Windows)"
       source env.sh
       mkdir -p repo/build && cd $_
       echo cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
@@ -469,6 +505,7 @@ runs:
     if: runner.os == 'Windows' && !endswith(inputs.compiler, '-notests') && !contains(inputs.compiler, '-notests-')
     shell: bash
     run: |
+      echo "## Run tests (Windows)"
       cd repo/build
       ctest --verbose . -j ${{ inputs.threads }} --output-on-failure --timeout ${{ inputs.ctest_timeout }}
 
