@@ -128,7 +128,7 @@ runs:
       source env.sh
       echo 'eval "$(brew shellenv)"' >> env.sh
       brew update-reset
-      brew install --force-bottle --overwrite cmake pkg-config bash
+      brew install --force-bottle --overwrite cmake pkg-config
 
   - name: Setup gcc 11 (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'gcc11-') || (inputs.compiler == 'gcc11'))
