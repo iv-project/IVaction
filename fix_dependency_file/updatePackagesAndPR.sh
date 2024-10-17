@@ -33,7 +33,18 @@ for l in $(${SCRIPT_DIR}/listAllGitRepositories.sh ${jsonpath}); do
 
     newestVersion=$(${SCRIPT_DIR}/isRemoteNewestVersion.sh "${name}" "${url}" "${ignores}")
     if [ "${newestVersion}" != "${currentVersion}" ]; then
-        jq '.packages.[] |= (if (.name == "'${name}'") then (.version |= "'${newestVersion}'") end)' $jsonpath > $jsonpath.new
+        plainVersion=$(jq -r '.packages.[] |
+            select(.name == "'${name}'")
+            | if .git_tag == null then
+                .git_tag = "v{VERSION}"
+              end
+            | .match = (.git_tag | sub("{VERSION}"; "(?<c1>.*)"))
+            | .match as $match
+            | .real_version = ("'${newestVersion}'" | gsub($match; "\(.c1)"))
+            | .real_version
+            ' $jsonpath)
+
+        jq '.packages.[] |= (if (.name == "'${name}'") then (.version |= "'${plainVersion}'") end)' $jsonpath > $jsonpath.new
         mv $jsonpath.new $jsonpath
         update=1
         body="${body}"$'\n'"- **${name}**: ${currentVersion} → ${newestVersion}"
