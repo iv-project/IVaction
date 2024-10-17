@@ -71,8 +71,8 @@ Each take following arguments:
     warn if HEAD is old and has no tag (in days). Only valid for check_tag.
 - `cpm_dependency_file` (optional, default: "cpm.dependencies")
     the dependency file that should be checked and updated
-
-
+-  `github_token`:
+    passthrough of the GITHUB token, needed by open_issue and cpm_dependcy_file
 
 ## Example for linux
 Activated on every pushes on PRs and update on the main branch.
