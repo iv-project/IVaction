@@ -49,6 +49,7 @@ Each take following arguments:
     - `lcov` - generates and uploads code coverage data (linux)
     - `cpm_version_check` - checks if CPM and the dependencies are the newest version (linux)
     - `cpm_version_check_inline` - check if CPM and the dependencies are the newest version by calling CPM_CHECK_VERSION target (linux)
+    - `cpm_update_version` - check cpm dependency file and creates an PR with fix (linux)
     - `spdx_license_lint` - checks if all files follow spdx header licensing (linux)
     - `check_tag` - checks if the current HEAD has a tag (linux)
     - `notests` - will not run any ctests
@@ -68,6 +69,8 @@ Each take following arguments:
     ctest timeout value in seconds
 - `age_of_last_commit (optional, default: 7) \
     warn if HEAD is old and has no tag (in days). Only valid for check_tag.
+- `cpm_dependency_file` (optional, default: "cpm.dependencies")
+    the dependency file that should be checked and updated
 
 
 
