@@ -18,7 +18,7 @@ newestVersion=$(git ls-remote --tags "${url}" \
     | cut -d '/' -f 3 \
     | grep -v "[\^]{}$" \
     | grep -P -v "^${ignores}$" \
-    | sed 's/^\([a-Z-]*-\?\)\(.*\)$/\2 \1\2/' \
+    | sed 's/^\([a-zA-Z-]*-\?\)\(.*\)$/\2 \1\2/' \
     | grep [0-9] \
     | grep -v .rc[0-9]* \
     | grep -v -- "-pre$" \
