@@ -245,7 +245,7 @@ runs:
     run: |
       echo "## Setup clang 18 (Linux, macOS)"
       source env.sh
-      brew install --force-bottle llvm@18
+      brew install llvm@18
       brew link -f llvm@18
       echo "export CXX=clang++" >> env.sh
       echo "export CC=clang" >> env.sh
