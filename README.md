@@ -101,7 +101,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-22.04, compiler: spdx_reuse_lint}
+          - {os: ubuntu-22.04, compiler: spdx_license_lint}
           - {os: ubuntu-22.04, compiler: cpm_version_check}
           - {os: ubuntu-22.04, compiler: gcc13-cpp20-release}
           - {os: ubuntu-22.04, compiler: gcc12-cpp20-release}
@@ -110,8 +110,8 @@ jobs:
           - {os: ubuntu-22.04, compiler: gcc13-cpp20-debug-sanitize_undefined}
           - {os: ubuntu-22.04, compiler: gcc13-cpp20-lcov}
           - {os: ubuntu-22.04, compiler: clang17-cpp20-release}
-          - {os: macos-12, compiler: gcc13-cpp20-release}
-          - {os: macos-12, compiler: clang17-cpp20-release}
+          - {os: macos-13,     compiler: gcc13-cpp20-release}
+          - {os: macos-13,     compiler: clang17-cpp20-release}
     steps:
       - name: Standard IV-project testing
         uses: iv-project/IVaction@v9.14 # make sure this is the newest version
