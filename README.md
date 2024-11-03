@@ -24,7 +24,7 @@ For each OS it provides a custom action:
 Each take following arguments:
 - `compiler` (required) \
     Which compiler to use `gcc12-cpp20-release`, `clang16-cpp17-debug`, etc
-    This string can be set togther from following options:
+    This string can be set together from following options:
     - `gcc11` - selects gcc 11 (linux and macos)
     - `gcc12` - selects gcc 12 (linux and macos)
     - `gcc13` - selects gcc 13 (linux and macos)
@@ -67,12 +67,12 @@ Each take following arguments:
     codecov secret, only required if code coverage is being required.
 - `ctest_timeout` (optional, default: 7200) \
     ctest timeout value in seconds
-- `age_of_last_commit (optional, default: 7) \
+- `age_of_last_commit` (optional, default: 7) \
     warn if HEAD is old and has no tag (in days). Only valid for check_tag.
 - `cpm_dependency_file` (optional, default: "cpm.dependencies")
     the dependency file that should be checked and updated
 -  `github_token`:
-    passthrough of the GITHUB token, needed by open_issue and cpm_dependcy_file
+    passthrough of the GITHUB token, needed by open_issue and cpm_dependency_file
 
 ## Example for linux
 Activated on every pushes on PRs and update on the main branch.
