@@ -64,6 +64,7 @@ runs:
       echo "export CMAKE_CXX_FLAGS='${{ inputs.cmake_cxx_flags }}'" >> env.sh
       echo "export CMAKE_C_FLAGS='${{ inputs.cmake_c_flags }}'" >> env.sh
       echo "export GCOV=gcov" >> env.sh
+      echo "MESSAGE=" >> "$GITHUB_ENV"
       echo "MODE=unknown" >> "$GITHUB_ENV"
 
   - name: Check if tagged
@@ -90,6 +91,7 @@ runs:
       if [ ${time_passed} -ge ${{ inputs.age_of_last_commit }} ]; then
         git describe --tags --exact-match HEAD
         if [ $? -ne 0 ]; then
+          echo "MESSAGE=\"git tag out of date\"" >> "$GITHUB_ENV"
           exit 1
         fi
       fi
@@ -538,3 +540,5 @@ runs:
     uses: jayqi/failed-build-issue-action@v1.2.0
     with:
       github-token: ${{ inputs.github_token }}
+      always-create-new-issue: true
+      title-template: ${{ env.MESSAGE }}
