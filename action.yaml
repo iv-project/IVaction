@@ -256,11 +256,11 @@ runs:
       echo "export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++\"" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
-  - name: Setup clang 19 (Linux, macOS)
-    if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'clang19-') || (inputs.compiler == 'clang19'))
+  - name: Setup clang 19 (Linux)
+    if: (runner.os == 'Linux') && (startsWith(inputs.compiler, 'clang19-') || (inputs.compiler == 'clang19'))
     shell: bash
     run: |
-      echo "## Setup clang 19 (Linux, macOS)"
+      echo "## Setup clang 19 (Linux)"
       source env.sh
       brew install llvm@19
       brew link -f llvm@19
@@ -269,6 +269,21 @@ runs:
       INSTALL_PREFIX=$(brew --prefix llvm@19)
       echo "export PATH=\"${INSTALL_PREFIX}/bin:$PATH\"" >> env.sh
       echo "export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++\"" >> env.sh
+      echo "MODE=compile" >> "$GITHUB_ENV"
+
+  - name: Setup clang 19 (macOS)
+    if: (runner.os == 'macOS') && (startsWith(inputs.compiler, 'clang19-') || (inputs.compiler == 'clang19'))
+    shell: bash
+    run: |
+      echo "## Setup clang 19 (macOS)"
+      source env.sh
+      brew install llvm@19
+      brew link -f llvm@19
+      echo "export CXX=clang++" >> env.sh
+      echo "export CC=clang" >> env.sh
+      INSTALL_PREFIX=$(brew --prefix llvm@19)
+      echo "export PATH=\"${INSTALL_PREFIX}/bin:$PATH\"" >> env.sh
+      echo "export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++ -L${INSTALL_PREFIX}/lib -lunwind\"" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
   - name: Setup intel (Linux)
