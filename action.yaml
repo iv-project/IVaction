@@ -63,6 +63,7 @@ runs:
       echo "export BUILD_TYPE=Release" >> env.sh
       echo "export CMAKE_CXX_FLAGS='${{ inputs.cmake_cxx_flags }}'" >> env.sh
       echo "export CMAKE_C_FLAGS='${{ inputs.cmake_c_flags }}'" >> env.sh
+      echo "export CMAKE_ARGS=" >> env.sh
       echo "export GCOV=gcov" >> env.sh
       echo "MESSAGE=" >> "$GITHUB_ENV"
       echo "MODE=unknown" >> "$GITHUB_ENV"
@@ -256,11 +257,11 @@ runs:
       echo "export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++\"" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
-  - name: Setup clang 19 (Linux)
-    if: (runner.os == 'Linux') && (startsWith(inputs.compiler, 'clang19-') || (inputs.compiler == 'clang19'))
+  - name: Setup clang 19 (Linux, macOS)
+    if: (runner.os == 'Linux' || runner.os == 'macOS') && (startsWith(inputs.compiler, 'clang19-') || (inputs.compiler == 'clang19'))
     shell: bash
     run: |
-      echo "## Setup clang 19 (Linux)"
+      echo "## Setup clang 19 (Linux, macOS)"
       source env.sh
       brew install llvm@19
       brew link -f llvm@19
@@ -271,20 +272,16 @@ runs:
       echo "export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++\"" >> env.sh
       echo "MODE=compile" >> "$GITHUB_ENV"
 
-  - name: Setup clang 19 (macOS)
+  - name: Setup clang 19 (macOS) - Part 2
     if: (runner.os == 'macOS') && (startsWith(inputs.compiler, 'clang19-') || (inputs.compiler == 'clang19'))
     shell: bash
     run: |
-      echo "## Setup clang 19 (macOS)"
+      echo "## Setup clang 19 (macOS) - Part 2"
       source env.sh
-      brew install llvm@19
-      brew link -f llvm@19
-      echo "export CXX=clang++" >> env.sh
-      echo "export CC=clang" >> env.sh
-      INSTALL_PREFIX=$(brew --prefix llvm@19)
-      echo "export PATH=\"${INSTALL_PREFIX}/bin:$PATH\"" >> env.sh
-      echo "export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++ -L${INSTALL_PREFIX}/lib -lunwind\"" >> env.sh
-      echo "MODE=compile" >> "$GITHUB_ENV"
+      if [ "${{ matrix.os }}" == "macos-14" ]; then
+        echo "export LDFLAGS=\"${LDFLAGS} -L/opt/homebrew/opt/llvm/lib/unwind -lunwind\"" >> env.sh
+      fi
+      echo "export CMAKE_ARGS=\"-DLIBCXXABI_USE_LLVM_UNWINDER=OFF -DCOMPILER_RT_USE_LLVM_UNWINDER=OFF\"" >> env.sh
 
   - name: Setup intel (Linux)
     if: (runner.os == 'Linux') && (startsWith(inputs.compiler, 'intel-') || (inputs.compiler == 'intel'))
@@ -489,7 +486,7 @@ runs:
       echo "## Configure tests (Linux, macOS)"
       source env.sh
       mkdir -p repo/build && cd $_
-      ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
+      ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${{ inputs.cmake_flags }} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}" ${CMAKE_ARGS}
 
   - name: Build tests (Linux, macOS)
     if: (runner.os == 'Linux' || runner.os == 'macOS') && env.MODE == 'compile'
