@@ -23,12 +23,19 @@ CPM_DEPENDENCY_FILE="${CPM_DEPENDENCY_FILE:-}" # the dependency file that should
 SDKROOT=
 CMAKE_LAUNCHER=
 
+bash --version
+
 check_cmd() {
     cmd="$1"
     A=$(echo $COMPILER | tr '-' ' ')
-    if [[ ${A[@]} =~ $(echo "\<$cmd\>") ]]; then
-        return 0
-    fi
+    for a in "${A[@]}"; do
+        if [ "${a}" == "${cmd}" ]; then
+            return 0
+        fi
+    done
+#    if [[ ${A[@]} =~ $(echo "\<$cmd\>") ]]; then
+#        return 0
+#    fi
     return 1
 }
 
@@ -36,13 +43,16 @@ compile_cmds=("gcc11" "gcc12" "gcc13" "gcc14"
               "clang15" "clang16" "clang17" "clang18" "clang19"
               "intel"
               "emscripten"
+              "msvc"
 )
 
 check_has_compile_cmd() {
     for e in $(echo $COMPILER | tr '-' ' '); do
-        if [[ "${compile_cmds[@]}" =~ $(echo "\<$e\>") ]]; then
-            return 0
-        fi
+        for a in "${compile_cmds[@]}"; do
+            if [ "${a}" == "${e}" ]; then
+                return 0
+            fi
+        done
     done
     return 1
 }
@@ -62,9 +72,13 @@ valid_cmds=("nosetup"
 valid_cmds+=(${compile_cmds[@]})
 
 for e in $(echo $COMPILER | tr '-' ' '); do
-    if [[ ${valid_cmds[@]} =~ $(echo "\<$e\>") ]]; then
-        true
-    else
+    SUCCESS=0
+    for a in "${valid_cmds[@]}"; do
+        if [ "${a}" == "${e}" ]; then
+            SUCCESS=1
+        fi
+    done
+    if [ "$SUCCESS" == "0" ]; then
         echo "command \"$e\" unknown"
         exit 1
     fi
@@ -78,7 +92,8 @@ export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}"
 export CMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
 export CMAKE_ARGS=
 export GCOV=gcov
-export REPO_PATH=${REPO_PATH:-$(pwd)/build}
+export REPO_PATH=${REPO_PATH:-$(pwd)}
+export REPO_PATH=$(realpath ${REPO_PATH})
 rm -f message.txt
 
 echo CMAKE_FLAGS=$CMAKE_FLAGS
@@ -157,8 +172,8 @@ setup_clang_v() {
         export CXX=clang++
         export CC=clang
         INSTALL_PREFIX=$(brew --prefix llvm@${v})
-        export PATH=\"${INSTALL_PREFIX}/bin:$PATH\"
-        export LDFLAGS=\"-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++\"
+        export PATH="${INSTALL_PREFIX}/bin:$PATH"
+        export LDFLAGS="-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++"
     fi
 }
 
@@ -172,13 +187,13 @@ if [ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]; then
   elif check_cmd "clang17"; then   setup_clang_v 17
   elif check_cmd "clang18"; then   setup_clang_v 18
   elif check_cmd "clang19"; then
-    setup_clang_v19
+    setup_clang_v 19
     if [ "$RUNNER_OS" = "macOS" ]; then
       echo "## Setup clang 19 (macOS) - Part 2"
       if [ "${MATRIX_OS}" == "macos-14" ]; then
-        export LDFLAGS=\"${LDFLAGS} -L/opt/homebrew/opt/llvm/lib/unwind -lunwind\"
+        export LDFLAGS="${LDFLAGS} -L/opt/homebrew/opt/llvm/lib/unwind -lunwind"
       fi
-      export CMAKE_ARGS=\"-DLIBCXXABI_USE_LLVM_UNWINDER=OFF -DCOMPILER_RT_USE_LLVM_UNWINDER=OFF\"
+      export CMAKE_ARGS="-DLIBCXXABI_USE_LLVM_UNWINDER=OFF -DCOMPILER_RT_USE_LLVM_UNWINDER=OFF"
     fi
   fi
 fi
@@ -269,8 +284,8 @@ if [ "$RUNNER_OS" = "Linux" ]; then
   fi
   if check_cmd "lcov"; then
     export BUILD_TYPE=Debug
-    export CMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS} --coverage\"
-    export CMAKE_C_FLAGS=\"${CMAKE_C_FLAGS} --coverage\"
+    export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} --coverage"
+    export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} --coverage"
   fi
 
   if check_cmd "cpm_version_check"; then
@@ -310,6 +325,7 @@ if ([ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]) && check_has_compi
 
   echo "## Configure tests (Linux, macOS)"
   mkdir -p ${REPO_PATH}/build && cd $_
+  pwd
   ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}" ${CMAKE_ARGS}
 
   echo "## Build tests (Linux, macOS)"

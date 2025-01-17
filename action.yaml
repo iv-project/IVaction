@@ -43,6 +43,11 @@ inputs:
     description: "passthrough of the GITHUB token, needed by open_issue"
     required: false
     default: ""
+  subfolder:
+    description: "target is located in a subdirectory"
+    required: false
+    default: "repo"
+
 
 runs:
   using: 'composite'
@@ -72,6 +77,7 @@ runs:
   - name: run action
     shell: bash
     run: |
+      echo "# Run action.sh"
       export CMAKE_FLAGS="${{ inputs.cmake_flags }}"
       export CMAKE_C_FLAGS="${{ inputs.cmake_c_flags }}"
       export CMAKE_CXX_FLAGS="${{ inputs.cmake_cxx_flags }}"
@@ -85,11 +91,8 @@ runs:
       export MATRIX_OS="${{ matrix.os }}
       export ACTION_PATH="${{ github.action_path }}"
       export GITHUB_REF_NAME="${{ github.ref_name }}"
-      ${ACTION_PATH}/action.bash "${{ inputs.compiler }}"
-
-  - name: Build something requiring CL.EXE (Windows)
-  - name: Run tests (Windows)
-
+      export REPO_PATH="repo/${{ inputs.subfolder }}"
+      ${ACTION_PATH}/action.sh "${{ inputs.compiler }}"
   - name: read message (if available)
     shell: bash
     run: |
