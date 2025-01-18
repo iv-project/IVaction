@@ -84,11 +84,11 @@ runs:
       export THREADS="${{ inputs.threads }}"
       export CODECOV_TOKEN="${{ inputs.codecov_token }}"
       export CTEST_TIMEOUT="${{ inputs.ctest_timeout }}"
-      export AGE_OF_LAST_COMMIT=${{ inputs.age_of_last_commit }}"
+      export AGE_OF_LAST_COMMIT="${{ inputs.age_of_last_commit }}"
       export CPM_DEPENDENCY_FILE="${{ inputs.cpm_dependency_file }}"
       export GITHUB_TOKEN="${{ inputs.github_token }}"
       export RUNNER_OS="${{ runner.os }}"
-      export MATRIX_OS="${{ matrix.os }}
+      export MATRIX_OS="${{ matrix.os }}"
       export ACTION_PATH="${{ github.action_path }}"
       export GITHUB_REF_NAME="${{ github.ref_name }}"
       export REPO_PATH="repo/${{ inputs.subfolder }}"
