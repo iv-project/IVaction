@@ -7,6 +7,7 @@ set -Eeuo pipefail
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 COMPILER="$1"
+shift
 CMAKE_FLAGS="${CMAKE_FLAGS:-}"
 CMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
 CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}"
@@ -196,19 +197,27 @@ if [ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]; then
     fi
   fi
 fi
-if [ "$RUNNER_OS" = "Linux" ] && check_cmd "intel" && ! check_cmd "nosetup"; then
+if [ "$RUNNER_OS" = "Linux" ] && check_cmd "intel"; then
   echo "## Setup intel (Linux)"
-  wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-  sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-  rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
-  sudo echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-  sudo apt-get update -y
-  sudo apt-get install -y intel-oneapi-compiler-dpcpp-cpp
-  source /opt/intel/oneapi/setvars.sh
-  sudo ln -fs $(icpx --print-prog-name=llvm-ar) /usr/bin/ar
-  sudo ln -fs $(icpx --print-prog-name=lld) /usr/bin/ld
-  sudo ln -fs $(icpx --print-prog-name=llvm-nm) /usr/bin/nm
-  sudo ln -fs $(icpx --print-prog-name=llvm-ranlib) /usr/bin/ranlib
+  if ! check_cmd "nosetup"; then
+      wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+      sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+      rm GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB
+      sudo echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+      sudo apt-get update -y
+      sudo apt-get install -y intel-oneapi-compiler-dpcpp-cpp
+      set +eu
+      source /opt/intel/oneapi/setvars.sh
+      set -eu
+      sudo ln -fs $(icpx --print-prog-name=llvm-ar) /usr/bin/ar
+      sudo ln -fs $(icpx --print-prog-name=lld) /usr/bin/ld
+      sudo ln -fs $(icpx --print-prog-name=llvm-nm) /usr/bin/nm
+      sudo ln -fs $(icpx --print-prog-name=llvm-ranlib) /usr/bin/ranlib
+  else
+      set +eu
+      source /opt/intel/oneapi/setvars.sh
+      set -eu
+  fi
   export CC=icx
   export CXX=icpx
 elif [ "$RUNNER_OS" = "Linux" ] && check_cmd "emscripten" && ! check_cmd "nosetup"; then
