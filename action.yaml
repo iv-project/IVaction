@@ -46,7 +46,7 @@ inputs:
   subfolder:
     description: "target is located in a subdirectory"
     required: false
-    default: "repo"
+    default: ""
 
 
 runs:
