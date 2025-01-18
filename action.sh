@@ -325,6 +325,7 @@ if ([ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]) && check_has_compi
   echo "## Configure tests (Linux, macOS)"
   mkdir -p ${REPO_PATH}/build && cd $_
   pwd
+  echo "${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS}\" -DCMAKE_C_FLAGS=\"${CMAKE_C_FLAGS}\" ${CMAKE_ARGS}"
   ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}" ${CMAKE_ARGS}
 
   echo "## Build tests (Linux, macOS)"
@@ -336,6 +337,8 @@ if [ "$RUNNER_OS" = "Linux" ] && check_cmd "lcov"; then
 
   cd ${REPO_PATH}/build
   echo ${GCOV}
+  cmake_version="$(cmake --version | cut -d ' ' -f 3)"
+  rm -rf "CMakeFiles/${cmake_version}"
   lcov -c -i --directory . --output coverage_base.info --gcov ${GCOV} --base-directory ..
 fi
 
