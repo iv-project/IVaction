@@ -27,7 +27,7 @@ bash --version
 
 check_cmd() {
     cmd="$1"
-    A=$(echo $COMPILER | tr '-' ' ')
+    A=($(echo $COMPILER | tr '-' ' '))
     for a in "${A[@]}"; do
         if [ "${a}" == "${cmd}" ]; then
             return 0
@@ -112,7 +112,6 @@ echo CPM_DEPENDENCY_FILE=$CPM_DEPENDENCY_FILE
 echo REPO_PATH=$REPO_PATH
 check_has_compile_cmd && echo "must compile"
 check_has_compile_cmd || echo "no compile"
-
 
 if [ "$RUNNER_OS" = "Linux" ] && check_cmd "check_tag"; then
   echo "## Check if tagged"
