@@ -337,14 +337,12 @@ if [ "$RUNNER_OS" = "Linux" ] && check_cmd "lcov"; then
 
   cd ${REPO_PATH}/build
   echo ${GCOV}
-  cmake_version="$(cmake --version | head -n 1 | cut -d ' ' -f 3)"
-  rm -r "CMakeFiles/${cmake_version}"
-  lcov -c -i --directory . --output coverage_base.info --gcov ${GCOV} --base-directory ..
+  lcov -c -i --directory . --output coverage_base.info --gcov ${GCOV} --base-directory .. || true
 fi
 
 if ([ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]) && check_has_compile_cmd && ! check_cmd "notests"; then
   echo "## Run tests (Linux, macOS)"
-  cd ${REPO_PATH}
+  cd ${REPO_PATH}/build
   ctest --verbose . -j ${THREADS} --output-on-failure --timeout ${CTEST_TIMEOUT} || ctest --verbose . -j ${THREADS} --output-on-failure --timeout ${CTEST_TIMEOUT} --rerun-failed
 fi
 
@@ -353,11 +351,11 @@ if [ "$RUNNER_OS" = "Linux" ] && check_cmd "lcov"; then
   cd ${REPO_PATH}/build
   lcov -c --directory . --output coverage_test.info --gcov ${GCOV} --base-directory ..
   lcov -a coverage_base.info -a coverage_test.info -o coverage.info
-  lcov --extract coverage.info '*/repo/*' --output-file coverage.info
-  lcov --remove coverage.info --ignore-errors unused '*/repo/lib/*' --output-file coverage.info
-  lcov --remove coverage.info --ignore-errors unused '*/repo/docs/*' --output-file coverage.info
-  lcov --remove coverage.info --ignore-errors unused '*/repo/CMakeCCompilerId.c' --output-file coverage.info
-  lcov --remove coverage.info --ignore-errors unused '*/repo/CMakeCXXCompilerId.cpp' --output-file coverage.info
+  lcov --extract coverage.info '*/repo/*' --output-file coverage.info || true
+  lcov --remove coverage.info --ignore-errors unused '*/repo/lib/*' --output-file coverage.info || true
+  lcov --remove coverage.info --ignore-errors unused '*/repo/docs/*' --output-file coverage.info || true
+  lcov --remove coverage.info --ignore-errors unused '*/repo/CMakeCCompilerId.c' --output-file coverage.info || true
+  lcov --remove coverage.info --ignore-errors unused '*/repo/CMakeCXXCompilerId.cpp' --output-file coverage.info || true
   lcov --list coverage.info
   curl -Os https://uploader.codecov.io/latest/linux/codecov
   chmod +x codecov
