@@ -337,8 +337,8 @@ if [ "$RUNNER_OS" = "Linux" ] && check_cmd "lcov"; then
 
   cd ${REPO_PATH}/build
   echo ${GCOV}
-  cmake_version="$(cmake --version | cut -d ' ' -f 3)"
-  rm -rf "CMakeFiles/${cmake_version}"
+  cmake_version="$(cmake --version | head -n 1 | cut -d ' ' -f 3)"
+  rm -r "CMakeFiles/${cmake_version}"
   lcov -c -i --directory . --output coverage_base.info --gcov ${GCOV} --base-directory ..
 fi
 
