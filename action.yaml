@@ -66,7 +66,7 @@ runs:
 
   - name: REUSE Compliance Check
     if: ${{ inputs.compiler == 'spdx_license_lint' }}
-    uses: fsfe/reuse-action@v3
+    uses: fsfe/reuse-action@v5
     with:
       args: --suppress-deprecation --root repo lint
 
