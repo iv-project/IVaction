@@ -40,11 +40,15 @@ inputs:
     required: false
     default: "cpm.dependencies"
   github_token:
-    description: "passthrough of the GITHUB token, needed by open_issue"
+    description: "pass-through of the GITHUB token, needed by open_issue"
     required: false
     default: ""
   subfolder:
     description: "target is located in a subdirectory"
+    required: false
+    default: ""
+  subfolders:
+    description: "multiple targets each located in a different subdir (separated by spaces)"
     required: false
     default: ""
 
@@ -92,7 +96,14 @@ runs:
       export ACTION_PATH="${{ github.action_path }}"
       export GITHUB_REF_NAME="${{ github.ref_name }}"
       export REPO_PATH="repo/${{ inputs.subfolder }}"
-      ${ACTION_PATH}/action.sh "${{ inputs.compiler }}"
+      export SUBFOLDERS="${{ inputs.subfolders }}"
+      compilers=(${{ inputs.compiler }})
+      for c in "${compilers[@]}"; do
+        echo "######################
+        echo "# Running ${c}"
+        echo "######################
+        ${ACTION_PATH}/action.sh "$c"
+      done
   - name: read message (if available)
     shell: bash
     run: |

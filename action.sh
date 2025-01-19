@@ -21,6 +21,7 @@ GITHUB_REF_NAME="${GITHUB_REF_NAME:-$(git branch --show-current)}"
 CTEST_TIMEOUT="${CTEST_TIMEOUT:-7200}"         # ctest timeout value in seconds
 GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 CPM_DEPENDENCY_FILE="${CPM_DEPENDENCY_FILE:-}" # the dependency file that should be checked and updated
+SUBFOLDERS=(${SUBFOLDERS:-"."})                # only activated if non empty, space separated list
 SDKROOT=
 CMAKE_LAUNCHER=
 
@@ -69,6 +70,7 @@ valid_cmds=("nosetup"
             "cpm_version_check" "cpm_version_check_inline" "cpm_update_version"
             "notests"
             "open_issue"
+            "setup_only"
 )
 valid_cmds+=(${compile_cmds[@]})
 
@@ -133,19 +135,24 @@ if [ "$RUNNER_OS" = "Linux" ] && check_cmd "check_tag"; then
     fi
   fi
 fi
-if [ "$RUNNER_OS" = "Linux" ] && ! check_cmd "nosetup"; then
-  echo "## Install tools (Linux)"
-  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+if [ "$RUNNER_OS" = "Linux" ]; then
+  if ! check_cmd "nosetup"; then
+    echo "## Install tools (Linux)"
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    sudo apt-get update -y
+    sudo apt-get install -y build-essential
+    brew upgrade
+  fi
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-  sudo apt-get update -y
-  sudo apt-get install -y build-essential
-  brew upgrade
-elif [ "$RUNNER_OS" = "macOS" ] && ! check_cmd "nosetup"; then
-  echo "## Install tools (macOS)"
+elif [ "$RUNNER_OS" = "macOS" ]; then
+  if ! check_cmd "nosetup"; then
+    echo "## Install tools (macOS)"
+    eval "$(brew shellenv)"
+    brew update-reset
+    brew install --force-bottle --overwrite cmake pkg-config
+  fi
   eval "$(brew shellenv)"
-  brew update-reset
-  brew install --force-bottle --overwrite cmake pkg-config
 fi
 
 setup_gcc_v() {
@@ -154,13 +161,13 @@ setup_gcc_v() {
       echo "## Setup gcc ${v} (Linux, macOS)"
       brew install --force-bottle gcc@${v}
       brew link -f gcc@${v}
-      export CXX=g++-${v}
-      export CC=gcc-${v}
-      export GCOV=gcov-${v}
-
-      #Only needed for macos
-      export SDKROOT=$(gcc-${v} -v 2>&1 | sed -n 's@.*--with-sysroot=\([^ ]*\).*@\1@p')
     fi
+    export CXX=g++-${v}
+    export CC=gcc-${v}
+    export GCOV=gcov-${v}
+
+    #Only needed for macos
+    export SDKROOT=$(gcc-${v} -v 2>&1 | sed -n 's@.*--with-sysroot=\([^ ]*\).*@\1@p')
 }
 
 setup_clang_v() {
@@ -169,12 +176,12 @@ setup_clang_v() {
         echo "## Setup clang ${v} (Linux, macOS)"
         brew install --force-bottle llvm@${v}
         brew link -f llvm@${v}
-        export CXX=clang++
-        export CC=clang
-        INSTALL_PREFIX=$(brew --prefix llvm@${v})
-        export PATH="${INSTALL_PREFIX}/bin:$PATH"
-        export LDFLAGS="-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++"
     fi
+    export CXX=clang++
+    export CC=clang
+    INSTALL_PREFIX=$(brew --prefix llvm@${v})
+    export PATH="${INSTALL_PREFIX}/bin:$PATH"
+    export LDFLAGS="-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++"
 }
 
 if [ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]; then
@@ -233,6 +240,18 @@ elif [ "$RUNNER_OS" = "Linux" ] && check_cmd "emscripten" && ! check_cmd "nosetu
   export CMAKE_LAUNCHER=emcmake
 fi
 
+if [ "$RUNNER_OS" = "Linux" ]; then
+  if check_cmd "lcov" && ! check_cmd "nosetup"; then
+    echo "## Setup lcov (Linux)"
+    sudo apt-get install lcov
+    lcov --version
+  fi
+fi
+
+if check_cmd "setup_only"; then
+  exit
+fi
+
 for v in 11 14 17 20 23; do
     if check_cmd "cpp${v}"; then
       echo "## Setup c++${v}"
@@ -285,32 +304,11 @@ if [ "$RUNNER_OS" = "Windows" ] && check_cmd "sanitize_thread"; then
 fi
 
 if [ "$RUNNER_OS" = "Linux" ]; then
-  if check_cmd "lcov" && ! check_cmd "nosetup"; then
-    echo "## Setup lcov (Linux)"
-    sudo apt-get install lcov
-    lcov --version
-  fi
   if check_cmd "lcov"; then
     export BUILD_TYPE=Debug
     export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} --coverage"
     export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} --coverage"
   fi
-
-  if check_cmd "cpm_version_check"; then
-    echo "## cpm_version_check (Linux)"
-    cp -r "${ACTION_PATH}"/cpm_check_version .
-    cd cpm_check_version
-    cmake .
-    make CPM_CHECK_NEWER_PACKAGES
-  fi
-
-  if check_cmd "cpm_version_check_inline"; then
-    echo "## cpm_version_check_inline (Linux)"
-    mkdir -p ${REPO_PATH}/build && cd $_
-    cmake .. -DCPM_CHECK_VERSION_ENABLED=TRUE ${CMAKE_FLAGS}
-    make CPM_CHECK_NEWER_PACKAGES
-  fi
-
   if check_cmd "cpm_version_check" && ! check_cmd "nosetup"; then
     echo "## cpm_update_version (Linux)"
     export GH_TOKEN=${GITHUB_TOKEN}
@@ -319,72 +317,97 @@ if [ "$RUNNER_OS" = "Linux" ]; then
     git config --global user.email "ivaction@noemail.com"
     git config --global user.name "IVaction"
   fi
-  if check_cmd "cpm_version_check"; then
-    cd $REPO_PATH
-    ${ACTION_PATH}/fix_dependency_file/updatePackagesAndPR.sh ${CPM_DEPENDENCY_FILE} $'\nclose and reopen this issue to trigger CI\n(generated by IVAction)'
+fi
+
+
+for SUBFOLDER in "${SUBFOLDERS[@]}"; do
+  SUBREPO_PATH=${REPO_PATH}/${SUBFOLDER}
+  BUILD_PATH=build-${COMPILER}
+
+  if [ "$RUNNER_OS" = "Linux" ]; then
+    if check_cmd "cpm_version_check"; then
+      echo "## cpm_version_check (Linux)"
+      cd "${SUBREPO_PATH}"
+      cp -r "${ACTION_PATH}"/cpm_check_version .
+      cd cpm_check_version
+      cmake .
+      make CPM_CHECK_NEWER_PACKAGES
+    fi
+
+    if check_cmd "cpm_version_check_inline"; then
+      echo "## cpm_version_check_inline (Linux)"
+      mkdir -p ${SUBREPO_PATH}/${BUILD_PATH} && cd $_
+      cmake .. -DCPM_CHECK_VERSION_ENABLED=TRUE ${CMAKE_FLAGS}
+      make CPM_CHECK_NEWER_PACKAGES
+    fi
+
+    if check_cmd "cpm_version_check"; then
+      cd $SUBREPO_PATH
+      ${ACTION_PATH}/fix_dependency_file/updatePackagesAndPR.sh ${CPM_DEPENDENCY_FILE} $'\nclose and reopen this issue to trigger CI\n(generated by IVAction)'
+    fi
   fi
-fi
 
-if ([ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]) && check_has_compile_cmd; then
-  echo "## Tool versions (Linux, macOS)"
-  cmake --version
-  echo "SDKROOT: ${SDKROOT}"
-  ${CXX:-echo} --version
+  if ([ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]) && check_has_compile_cmd; then
+    echo "## Tool versions (Linux, macOS)"
+    cmake --version
+    echo "SDKROOT: ${SDKROOT}"
+    ${CXX:-echo} --version
 
-  echo "## Configure tests (Linux, macOS)"
-  mkdir -p ${REPO_PATH}/build && cd $_
-  pwd
-  echo "${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS}\" -DCMAKE_C_FLAGS=\"${CMAKE_C_FLAGS}\" ${CMAKE_ARGS}"
-  ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}" ${CMAKE_ARGS}
+    echo "## Configure tests (Linux, macOS)"
+    mkdir -p ${SUBREPO_PATH}/${BUILD_PATH} && cd $_
+    pwd
+    echo "${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS}\" -DCMAKE_C_FLAGS=\"${CMAKE_C_FLAGS}\" ${CMAKE_ARGS}"
+    ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}" ${CMAKE_ARGS}
 
-  echo "## Build tests (Linux, macOS)"
-  make -k -j ${THREADS} VERBOSE=1
-fi
-
-if [ "$RUNNER_OS" = "Linux" ] && check_cmd "lcov"; then
-  echo "## Generate base coverage"
-
-  cd ${REPO_PATH}/build
-  echo ${GCOV}
-  lcov -c -i --directory . --output coverage_base.info --gcov ${GCOV} --base-directory .. || true
-fi
-
-if ([ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]) && check_has_compile_cmd && ! check_cmd "notests"; then
-  echo "## Run tests (Linux, macOS)"
-  cd ${REPO_PATH}/build
-  ctest --verbose . -j ${THREADS} --output-on-failure --timeout ${CTEST_TIMEOUT} || ctest --verbose . -j ${THREADS} --output-on-failure --timeout ${CTEST_TIMEOUT} --rerun-failed
-fi
-
-if [ "$RUNNER_OS" = "Linux" ] && check_cmd "lcov"; then
-  echo "## Generate Coverage report and upload (Linux)"
-  cd ${REPO_PATH}/build
-  lcov -c --directory . --output coverage_test.info --gcov ${GCOV} --base-directory ..
-  lcov -a coverage_base.info -a coverage_test.info -o coverage.info
-  lcov --extract coverage.info '*/repo/*' --output-file coverage.info || true
-  lcov --remove coverage.info --ignore-errors unused '*/repo/lib/*' --output-file coverage.info || true
-  lcov --remove coverage.info --ignore-errors unused '*/repo/docs/*' --output-file coverage.info || true
-  lcov --remove coverage.info --ignore-errors unused '*/repo/CMakeCCompilerId.c' --output-file coverage.info || true
-  lcov --remove coverage.info --ignore-errors unused '*/repo/CMakeCXXCompilerId.cpp' --output-file coverage.info || true
-  lcov --list coverage.info
-  curl -Os https://uploader.codecov.io/latest/linux/codecov
-  chmod +x codecov
-  if [ -n "${CODECOV_TOKEN}" ]; then
-    export CODECOV="-t ${CODECOV_TOKEN}"
+    echo "## Build tests (Linux, macOS)"
+    make -k -j ${THREADS} VERBOSE=1
   fi
-  ./codecov ${CODECOV:-} -f coverage.info -B $GITHUB_REF_NAME
-fi
 
-if [ "$RUNNER_OS" = "Windows" ]; then
-  echo "## Build something requiring CL.EXE (Windows)"
-  mkdir -p ${REPO_PATH}/build && cd $_
-  echo cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
-  cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
-  echo nmake VERBOSE=1
-  nmake VERBOSE=1
-fi
+  if [ "$RUNNER_OS" = "Linux" ] && check_cmd "lcov"; then
+    echo "## Generate base coverage"
 
-if [ "$RUNNER_OS" = "Windows" ] && ! check_cmd "notests"; then
-  echo "## Run tests (Windows)"
-  cd ${REPO_PATH}
-  ctest --verbose . -j ${THREADS} --output-on-failure --timeout ${CTEST_TIMEOUT}
-fi
+    cd ${SUBREPO_PATH}/${BUILD_PATH}
+    echo ${GCOV}
+    lcov -c -i --directory . --output coverage_base.info --gcov ${GCOV} --base-directory .. || true
+  fi
+
+  if ([ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]) && check_has_compile_cmd && ! check_cmd "notests"; then
+    echo "## Run tests (Linux, macOS)"
+    cd ${SUBREPO_PATH}/${BUILD_PATH}
+    ctest --verbose . -j ${THREADS} --output-on-failure --timeout ${CTEST_TIMEOUT} || ctest --verbose . -j ${THREADS} --output-on-failure --timeout ${CTEST_TIMEOUT} --rerun-failed
+  fi
+
+  if [ "$RUNNER_OS" = "Linux" ] && check_cmd "lcov"; then
+    echo "## Generate Coverage report and upload (Linux)"
+    cd ${SUBREPO_PATH}/${BUILD_PATH}
+    lcov -c --directory . --output coverage_test.info --gcov ${GCOV} --base-directory ..
+    lcov -a coverage_base.info -a coverage_test.info -o coverage.info
+    lcov --extract coverage.info '*/repo/*' --output-file coverage.info || true
+    lcov --remove coverage.info --ignore-errors unused '*/repo/lib/*' --output-file coverage.info || true
+    lcov --remove coverage.info --ignore-errors unused '*/repo/docs/*' --output-file coverage.info || true
+    lcov --remove coverage.info --ignore-errors unused '*/repo/CMakeCCompilerId.c' --output-file coverage.info || true
+    lcov --remove coverage.info --ignore-errors unused '*/repo/CMakeCXXCompilerId.cpp' --output-file coverage.info || true
+    lcov --list coverage.info
+    curl -Os https://uploader.codecov.io/latest/linux/codecov
+    chmod +x codecov
+    if [ -n "${CODECOV_TOKEN}" ]; then
+      export CODECOV="-t ${CODECOV_TOKEN}"
+    fi
+    ./codecov ${CODECOV:-} -f coverage.info -B $GITHUB_REF_NAME
+  fi
+
+  if [ "$RUNNER_OS" = "Windows" ]; then
+    echo "## Build something requiring CL.EXE (Windows)"
+    mkdir -p ${SUBREPO_PATH}/${BUILD_PATH} && cd $_
+    echo cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
+    cmake .. -G "NMake Makefiles" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
+    echo nmake VERBOSE=1
+    nmake VERBOSE=1
+  fi
+
+  if [ "$RUNNER_OS" = "Windows" ] && ! check_cmd "notests"; then
+    echo "## Run tests (Windows)"
+    cd ${SUBREPO_PATH}/${BUILD_PATH}
+    ctest --verbose . -j ${THREADS} --output-on-failure --timeout ${CTEST_TIMEOUT}
+  fi
+done
