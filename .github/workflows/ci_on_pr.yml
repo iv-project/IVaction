@@ -48,7 +48,7 @@ jobs:
           - {os: windows-2022, compiler: msvc-cpp20-debug}
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction@feat/using_bash_scripts
+        uses: iv-project/IVaction@main
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
