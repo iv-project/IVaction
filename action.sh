@@ -385,6 +385,6 @@ fi
 
 if [ "$RUNNER_OS" = "Windows" ] && ! check_cmd "notests"; then
   echo "## Run tests (Windows)"
-  cd ${REPO_PATH}
+  cd ${REPO_PATH}/build
   ctest --verbose . -j ${THREADS} --output-on-failure --timeout ${CTEST_TIMEOUT}
 fi
