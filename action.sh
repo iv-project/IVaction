@@ -297,7 +297,7 @@ for e in "address" "undefined" "thread"; do
   fi
 done
 
-if [ "$RUNNER_OS" = "Windows" ] && check_cmd "sanitize_thread"; then
+if [ "$RUNNER_OS" = "Windows" ] && check_cmd "sanitize_address"; then
   echo "## Setup Sanitize Thread (Windows)"
   export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} /fsanitize=address"
   export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} /fsanitize=address"
