@@ -8,7 +8,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 COMPILER="$1"
 shift
-CMAKE_FLAGS="${CMAKE_FLAGS:-}"
+CMAKE_FLAGS="${CMAKE_FLAGS:+\"${CMAKE_FLAGS}\"}"
 CMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
 CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}"
 THREADS="${THREADS:-1}"
