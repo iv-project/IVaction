@@ -43,7 +43,7 @@ jobs:
           - {os: ubuntu-22.04, compiler: clang17-cpp20-release}
           - {os: ubuntu-22.04, compiler: clang18-cpp20-release}
           - {os: ubuntu-22.04, compiler: clang19-cpp20-release}
-          - {os: ubuntu-22.04, compiler: emscripten-cpp20-release}
+          - {os: ubuntu-22.04, compiler: emscripten-cpp20-release, cmake_flags: "-DCMAKE_EXE_LINKER_FLAGS='-fexceptions -sSTACK_SIZE=1000000'", cmake_cxx_flags: "-Wno-c++11-narrowing -fexceptions"}
           - {os: ubuntu-22.04, compiler: intel-cpp20-release}
           - {os: macos-13,     compiler: gcc14-cpp20-release}
           - {os: macos-13,     compiler: clang17-cpp20-release}
@@ -55,7 +55,7 @@ jobs:
             }
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction@main
+        uses: iv-project/IVaction@fix/cmake_quotes
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
