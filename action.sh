@@ -191,6 +191,7 @@ setup_clang_v2() {
     lldpkg=lld@${v}
     if [ "${v}" == 20 ]; then
         pkg=llvm #!HACK !TODO homebrew doesn't install llvm@20
+        lldpkg=lld
     fi
     if ! check_cmd "nosetup"; then
         echo "## Setup clang $pkg (Linux, macOS)"
