@@ -42,7 +42,7 @@ check_cmd() {
 }
 
 compile_cmds=("gcc11" "gcc12" "gcc13" "gcc14"
-              "clang15" "clang16" "clang17" "clang18" "clang19"
+              "clang15" "clang16" "clang17" "clang18" "clang19" "clang20"
               "intel"
               "emscripten"
               "msvc"
@@ -174,12 +174,12 @@ setup_clang_v() {
     v=$1
     if ! check_cmd "nosetup"; then
         echo "## Setup clang ${v} (Linux, macOS)"
-        brew install --force-bottle llvm@${v}
-        brew link -f llvm@${v}
+        brew install --force-bottle ${v}
+        brew link -f ${v}
     fi
     export CXX=clang++
     export CC=clang
-    INSTALL_PREFIX=$(brew --prefix llvm@${v})
+    INSTALL_PREFIX=$(brew --prefix ${v})
     export PATH="${INSTALL_PREFIX}/bin:$PATH"
     export LDFLAGS="-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++"
 }
@@ -189,14 +189,23 @@ if [ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]; then
   elif check_cmd "gcc12"; then     setup_gcc_v 12
   elif check_cmd "gcc13"; then     setup_gcc_v 13
   elif check_cmd "gcc14"; then     setup_gcc_v 14
-  elif check_cmd "clang15"; then   setup_clang_v 15
-  elif check_cmd "clang16"; then   setup_clang_v 16
-  elif check_cmd "clang17"; then   setup_clang_v 17
-  elif check_cmd "clang18"; then   setup_clang_v 18
+  elif check_cmd "clang15"; then   setup_clang_v llvm@15
+  elif check_cmd "clang16"; then   setup_clang_v llvm@16
+  elif check_cmd "clang17"; then   setup_clang_v llvm@17
+  elif check_cmd "clang18"; then   setup_clang_v llvm@18
   elif check_cmd "clang19"; then
-    setup_clang_v 19
+    setup_clang_v llvm@19
     if [ "$RUNNER_OS" = "macOS" ]; then
       echo "## Setup clang 19 (macOS) - Part 2"
+      if [ "${MATRIX_OS}" == "macos-14" ]; then
+        export LDFLAGS="${LDFLAGS} -L/opt/homebrew/opt/llvm/lib/unwind -lunwind"
+      fi
+      export CMAKE_ARGS="-DLIBCXXABI_USE_LLVM_UNWINDER=OFF -DCOMPILER_RT_USE_LLVM_UNWINDER=OFF"
+    fi
+  elif check_cmd "clang20"; then
+    setup_clang_v llvm
+    if [ "$RUNNER_OS" = "macOS" ]; then
+      echo "## Setup clang 20 (macOS) - Part 2"
       if [ "${MATRIX_OS}" == "macos-14" ]; then
         export LDFLAGS="${LDFLAGS} -L/opt/homebrew/opt/llvm/lib/unwind -lunwind"
       fi
