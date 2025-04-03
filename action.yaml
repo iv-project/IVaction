@@ -99,10 +99,9 @@ runs:
       export SUBFOLDERS="${{ inputs.subfolders }}"
       compilers=(${{ inputs.compiler }})
       for c in "${compilers[@]}"; do
-        echo "######################
-        echo "# Running ${c}"
-        echo "######################
+        echo "::group::${c}"
         ${ACTION_PATH}/action.sh "$c"
+        echo "::endgroup::"
       done
   - name: read message (if available)
     shell: bash
