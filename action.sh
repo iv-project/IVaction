@@ -181,8 +181,8 @@ setup_clang_v() {
     export CXX=clang++
     export CC=clang
     INSTALL_PREFIX=$(brew --prefix $pkg)
-    export PATH="${INSTALL_PREFIX}/bin:$PATH"
-    export LDFLAGS="-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++"
+    export PATH="${INSTALL_PREFIX}/bin:${PATH:+:${PATH}}"
+    export LDFLAGS="-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++ ${LDFLAGS:-}"
 }
 
 setup_clang_v2() {
@@ -195,23 +195,25 @@ setup_clang_v2() {
         lldpkg=lld
         if [ "$RUNNER_OS" = "Linux" ]; then
             libomp=libomp
+            export LDFLAGS="-L${HOMEBREW_PREFIX}/opt/libomp/lib ${LDFLAGS:-}"
+            export CPPFLAGS="-I${HOMEBREW_PREFIX}/opt/libomp/include ${CPPFLAGS:-}"
         fi
     fi
     if ! check_cmd "nosetup"; then
         echo "## Setup clang $pkg (Linux, macOS)"
         brew install --force-bottle $pkg $lldpkg $libomp
-        brew link -f $pkg $lldpkg $libomp
+        brew link -f $pkg $lldpkg
     fi
     export CXX=clang++
     export CC=clang
     INSTALL_PREFIX=$(brew --prefix $pkg)
-    export PATH="${INSTALL_PREFIX}/bin:$PATH"
-    export LDFLAGS="-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++"
+    export PATH="${INSTALL_PREFIX}/bin${PATH:+:${PATH}}"
+    export LDFLAGS="-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++ ${LDFLAGS:-}"
 
     if [ "$RUNNER_OS" = "macOS" ]; then
       echo "## Setup clang ${v} (macOS) - Part 2"
       if [ "${MATRIX_OS}" == "macos-14" ]; then
-        export LDFLAGS="${LDFLAGS} -L/opt/homebrew/opt/llvm/lib/unwind -lunwind"
+        export LDFLAGS="${LDFLAGS} -L${HOMEBREW_PREFIX}/opt/llvm/lib/unwind -lunwind"
       fi
       export CMAKE_ARGS="-DLIBCXXABI_USE_LLVM_UNWINDER=OFF -DCOMPILER_RT_USE_LLVM_UNWINDER=OFF"
     fi

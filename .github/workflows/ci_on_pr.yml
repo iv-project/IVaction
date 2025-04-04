@@ -50,6 +50,7 @@ jobs:
           - {os: macos-13,     compiler: clang19-cpp20-release}
           - {os: macos-13,     compiler: clang20-cpp20-release}
           - {os: macos-14,     compiler: gcc14-cpp20-release}
+          - {os: macos-14,     compiler: clang19-cpp20-release}
           - {os: macos-14,     compiler: clang20-cpp20-release}
           - {os: windows-2022, compiler: msvc-cpp20-release
                                          msvc-cpp20-debug-sanitize_address
