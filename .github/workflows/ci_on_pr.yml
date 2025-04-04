@@ -50,7 +50,6 @@ jobs:
           - {os: macos-13,     compiler: clang19-cpp20-release}
           - {os: macos-13,     compiler: clang20-cpp20-release}
           - {os: macos-14,     compiler: gcc14-cpp20-release}
-          - {os: macos-14,     compiler: clang19-cpp20-release}
           - {os: macos-14,     compiler: clang20-cpp20-release}
           - {os: windows-2022, compiler: msvc-cpp20-release
                                          msvc-cpp20-debug-sanitize_address
@@ -59,7 +58,7 @@ jobs:
             }
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction@9a3b1b30454dae7142885d4dec61d3a9c2c5b8e4
+        uses: iv-project/IVaction@fix/omp
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
