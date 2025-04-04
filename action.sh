@@ -189,14 +189,18 @@ setup_clang_v2() {
     v=$1
     pkg=llvm@${v}
     lldpkg=lld@${v}
+    libomp=
     if [ "${v}" == 20 ]; then
         pkg=llvm #!HACK !TODO homebrew doesn't install llvm@20
         lldpkg=lld
+        if [ "$RUNNER_OS" = "Linux" ]; then
+            libomp=libomp
+        fi
     fi
     if ! check_cmd "nosetup"; then
         echo "## Setup clang $pkg (Linux, macOS)"
-        brew install --force-bottle $pkg $lldpkg
-        brew link -f $pkg $lldpkg
+        brew install --force-bottle $pkg $lldpkg $libomp
+        brew link -f $pkg $lldpkg $libomp
     fi
     export CXX=clang++
     export CC=clang
