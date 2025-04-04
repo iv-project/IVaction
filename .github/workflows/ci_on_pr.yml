@@ -40,11 +40,10 @@ jobs:
                                          gcc14-nosetup-cpp20-debug-sanitize_undefined
                                          gcc14-nosetup-cpp20-debug-sanitize_thread
             }
-          - {os: ubuntu-22.04, compiler: clang17-cpp20-release
-                                         clang18-cpp20-release
-                                         clang19-cpp20-release
-                                         clang20-cpp20-release
-            }
+          - {os: ubuntu-22.04, compiler: clang17-cpp20-release}
+          - {os: ubuntu-22.04, compiler: clang18-cpp20-release}
+          - {os: ubuntu-22.04, compiler: clang19-cpp20-release}
+          - {os: ubuntu-22.04, compiler: clang20-cpp20-release}
           - {os: ubuntu-22.04, compiler: emscripten-cpp20-release, cmake_flags: "-DCMAKE_EXE_LINKER_FLAGS='-fexceptions -sSTACK_SIZE=1000000'", cmake_cxx_flags: "-Wno-c++11-narrowing -fexceptions"}
           - {os: ubuntu-22.04, compiler: intel-cpp20-release}
           - {os: macos-13,     compiler: gcc14-cpp20-release}
@@ -59,14 +58,14 @@ jobs:
             }
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction@9a3b1b30454dae7142885d4dec61d3a9c2c5b8e4
+        uses: iv-project/IVaction@fix/omp
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
           cmake_flags: ${{ matrix.cmake_flags }}
           cmake_c_flags: ${{ matrix.cmake_c_flags }}
           cmake_cxx_flags: ${{ matrix.cmake_cxx_flags }}
-          subfolders: "test-project test-project2"
+          subfolders: "test-project test-project2 test-project_with_omp"
   final:
     runs-on: ubuntu-22.04
     name: final-pass
