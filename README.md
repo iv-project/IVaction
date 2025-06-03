@@ -29,6 +29,7 @@ Each take following arguments:
     - `gcc12` - selects gcc 12 (linux and macos)
     - `gcc13` - selects gcc 13 (linux and macos)
     - `gcc14` - selects gcc 14 (linux and macos)
+    - `gcc15` - selects gcc 15 (linux and macos)
     - `clang15` - selects clang 15 (linux and macos)
     - `clang16` - selects clang 16 (linux and macos)
     - `clang17` - selects clang 17 (linux and macos)
@@ -41,6 +42,7 @@ Each take following arguments:
     - `cpp17` - requests c++17
     - `cpp20` - requests c++20
     - `cpp23` - requests c++23
+    - `cpp26` - requests c++26
     - `release` - sets cmake build type to release
     - `debug` - sets cmake build type to debug
     - `relwithdebinfo` - sets cmake build type to relwithdebinfo
