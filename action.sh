@@ -41,7 +41,7 @@ check_cmd() {
     return 1
 }
 
-compile_cmds=("gcc11" "gcc12" "gcc13" "gcc14"
+compile_cmds=("gcc11" "gcc12" "gcc13" "gcc14" "gcc15"
               "clang15" "clang16" "clang17" "clang18" "clang19" "clang20"
               "intel"
               "emscripten"
@@ -62,7 +62,7 @@ check_has_compile_cmd() {
 valid_cmds=("nosetup"
             "check_tag"
             "spdx_license_lint"
-            "cpp11" "cpp14" "cpp17" "cpp20" "cpp23"
+            "cpp11" "cpp14" "cpp17" "cpp20" "cpp23" "cpp26"
             "release" "debug" "relwithdebinfo"
             "strict"
             "sanitize_address" "sanitize_undefined" "sanitize_thread"
@@ -236,6 +236,7 @@ if [ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]; then
   elif check_cmd "gcc12"; then     setup_gcc_v 12
   elif check_cmd "gcc13"; then     setup_gcc_v 13
   elif check_cmd "gcc14"; then     setup_gcc_v 14
+  elif check_cmd "gcc15"; then     setup_gcc_v 15
   elif check_cmd "clang15"; then   setup_clang_v 15
   elif check_cmd "clang16"; then   setup_clang_v 16
   elif check_cmd "clang17"; then   setup_clang_v 17
@@ -292,7 +293,7 @@ if check_cmd "setup_only"; then
   exit
 fi
 
-for v in 11 14 17 20 23; do
+for v in 11 14 17 20 23 26; do
     if check_cmd "cpp${v}"; then
       echo "## Setup c++${v}"
       export CXX_STANDARD=${v}
