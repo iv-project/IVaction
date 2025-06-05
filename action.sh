@@ -162,7 +162,7 @@ setup_gcc_v() {
       echo "## Setup gcc ${v} (Linux, macOS)"
       brew install --force-bottle gcc@${v}
       brew link -f gcc@${v}
-      if [ "${v}" = "15" ]; then
+      if [ "${v}" = "15" ] && [ "${RUNNER_OS}" = "Linux" ]; then
         brew install --force-bottle binutils
         brew link --force binutils
       fi
