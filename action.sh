@@ -32,8 +32,8 @@ COMPILER="$(echo ${COMPILER} | sed "s/gcc-latest/gcc15/")"
 COMPILER="$(echo ${COMPILER} | sed "s/gcc-second-latest/gcc14/")"
 COMPILER="$(echo ${COMPILER} | sed "s/gcc-third-latest/gcc13/")"
 COMPILER="$(echo ${COMPILER} | sed "s/clang-latest/clang20/")"
-COMPILER="$(echo ${COMPILER} | sed "s/clang-second-latest/gcc19/")"
-COMPILER="$(echo ${COMPILER} | sed "s/clang-third-latest/gcc18/")"
+COMPILER="$(echo ${COMPILER} | sed "s/clang-second-latest/clang19/")"
+COMPILER="$(echo ${COMPILER} | sed "s/clang-third-latest/clang18/")"
 
 
 check_cmd() {
@@ -50,7 +50,7 @@ check_cmd() {
     return 1
 }
 
-compile_cmds=("gcc11" "gcc12" "gcc13" "gcc14" "gcc15",
+compile_cmds=("gcc11" "gcc12" "gcc13" "gcc14" "gcc15"
               "clang15" "clang16" "clang17" "clang18" "clang19" "clang20"
               "intel"
               "emscripten"
