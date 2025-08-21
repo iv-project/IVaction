@@ -10,16 +10,16 @@ Easy to use C++/CMake/ctest continuous integration github actions. Support for L
 
 ## Synopsis
 ```
-      - uses: iv-project/IVaction@v9.14
+      - uses: iv-project/IVaction@v10.10
         with:
-          compiler: gcc12-cpp20-debug
+          compiler: gcc15-cpp20-debug
 ```
 
 ## Platforms
 
 For each OS it provides a custom action:
 
-- iv-project/IVaction@v9.14
+- iv-project/IVaction@v10.10
 
 Each take following arguments:
 - `compiler` (required) \
@@ -30,12 +30,14 @@ Each take following arguments:
     - `gcc13` - selects gcc 13 (linux and macos)
     - `gcc14` - selects gcc 14 (linux and macos)
     - `gcc15` - selects gcc 15 (linux and macos)
+    - `gcc-latest`, `gcc-second-latest`, `gcc-third-latest` - referring to gcc15 , gcc14 and gcc13
     - `clang15` - selects clang 15 (linux and macos)
     - `clang16` - selects clang 16 (linux and macos)
     - `clang17` - selects clang 17 (linux and macos)
     - `clang18` - selects clang 18 (linux and macos)
     - `clang19` - selects clang 19 (linux and macos-13)
     - `clang20` - selects clang 20 (linux and macos)
+    - `clang-latest`, `clang-second-latest`, `clang-third-latest` - referring to clang20 , clang19 and clang18
     - `msvc` - selects msvc (windows)
     - `intel` - selects intels llvm compiler (linux)
     - `emscripten` - selects emscripten as compiler (linux)
@@ -76,7 +78,7 @@ Each take following arguments:
 - `cpm_dependency_file` (optional, default: "cpm.dependencies")
     the dependency file that should be checked and updated
 -  `github_token`:
-    passthrough of the GITHUB token, needed by open_issue and cpm_dependency_file
+    pass through of the GITHUB token, needed by open_issue and cpm_dependency_file
 
 ## Example for linux
 Activated on every pushes on PRs and update on the main branch.
@@ -107,18 +109,18 @@ jobs:
         include:
           - {os: ubuntu-22.04, compiler: spdx_license_lint}
           - {os: ubuntu-22.04, compiler: cpm_version_check}
+          - {os: ubuntu-22.04, compiler: gcc15-cpp20-release}
+          - {os: ubuntu-22.04, compiler: gcc14-cpp20-release}
           - {os: ubuntu-22.04, compiler: gcc13-cpp20-release}
-          - {os: ubuntu-22.04, compiler: gcc12-cpp20-release}
-          - {os: ubuntu-22.04, compiler: gcc11-cpp20-release}
-          - {os: ubuntu-22.04, compiler: gcc13-cpp20-debug-sanitize_address}
-          - {os: ubuntu-22.04, compiler: gcc13-cpp20-debug-sanitize_undefined}
-          - {os: ubuntu-22.04, compiler: gcc13-cpp20-lcov}
-          - {os: ubuntu-22.04, compiler: clang17-cpp20-release}
-          - {os: macos-13,     compiler: gcc13-cpp20-release}
-          - {os: macos-13,     compiler: clang17-cpp20-release}
+          - {os: ubuntu-22.04, compiler: gcc15-cpp20-debug-sanitize_address}
+          - {os: ubuntu-22.04, compiler: gcc15-cpp20-debug-sanitize_undefined}
+          - {os: ubuntu-22.04, compiler: gcc15-cpp20-lcov}
+          - {os: ubuntu-22.04, compiler: clang20-cpp20-release}
+          - {os: macos-14,     compiler: gcc15-cpp20-release}
+          - {os: macos-14,     compiler: clang20-cpp20-release}
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction@v9.14 # make sure this is the newest version
+        uses: iv-project/IVaction@v10.10 # make sure this is the newest version
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
