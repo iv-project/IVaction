@@ -412,13 +412,7 @@ for SUBFOLDER in "${SUBFOLDERS[@]}"; do
     pwd
 
     export CMAKE_FLAGS="${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS}\" -DCMAKE_C_FLAGS=\"${CMAKE_C_FLAGS}\" ${CMAKE_ARGS}"
-    split() {
-        for i in $(seq 1 $#); do
-            echo "${!i}"
-        done
-    }
-    readarray -t CMAKE_FLAGS_ARRAY -c 1 <<< "$(eval $(echo split "${CMAKE_FLAGS}"))"
-
+    eval CMAKE_FLAGS_ARRAY=($(echo "${CMAKE_FLAGS}"))
     echo "${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS_ARRAY[@]@Q}"
     eval ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS_ARRAY[@]@Q}
 
