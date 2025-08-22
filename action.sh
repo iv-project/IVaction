@@ -23,7 +23,7 @@ GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 CPM_DEPENDENCY_FILE="${CPM_DEPENDENCY_FILE:-}" # the dependency file that should be checked and updated
 SUBFOLDERS=(${SUBFOLDERS:-"."})                # only activated if non empty, space separated list
 SDKROOT=
-CMAKE_LAUNCHER=
+CMAKE_LAUNCHER="${CMAKE_LAUNCHER:-}"
 
 bash --version
 
@@ -410,8 +410,17 @@ for SUBFOLDER in "${SUBFOLDERS[@]}"; do
     echo "## Configure tests (Linux, macOS)"
     mkdir -p ${SUBREPO_PATH}/${BUILD_PATH} && cd $_
     pwd
-    echo "${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS:+"${CMAKE_FLAGS}"} -DCMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS}\" -DCMAKE_C_FLAGS=\"${CMAKE_C_FLAGS}\" ${CMAKE_ARGS}"
-    ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS:+"${CMAKE_FLAGS}"} -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS}" -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}" ${CMAKE_ARGS}
+
+    export CMAKE_FLAGS="${CMAKE_FLAGS} -DCMAKE_CXX_FLAGS=\"${CMAKE_CXX_FLAGS}\" -DCMAKE_C_FLAGS=\"${CMAKE_C_FLAGS}\" ${CMAKE_ARGS}"
+    split() {
+        for i in $(seq 1 $#); do
+            echo "${!i}"
+        done
+    }
+    readarray -t CMAKE_FLAGS_ARRAY -c 1 <<< "$(eval $(echo split "${CMAKE_FLAGS}"))"
+
+    echo "${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS_ARRAY[@]@Q}"
+    eval ${CMAKE_LAUNCHER} cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_STANDARD=${CXX_STANDARD} ${CMAKE_FLAGS_ARRAY[@]@Q}
 
     echo "## Build tests (Linux, macOS)"
     make -k -j ${THREADS} VERBOSE=1
