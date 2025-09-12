@@ -160,6 +160,11 @@ elif [ "$RUNNER_OS" = "macOS" ]; then
     echo "## Install tools (macOS)"
     eval "$(brew shellenv)"
     brew update-reset
+    if [ "${MATRIX_OS}" == "macos-14" ]; then
+        cmake --version
+        brew uninstall cmake
+    fi
+
     brew install --force-bottle --overwrite cmake pkg-config
   fi
   eval "$(brew shellenv)"
