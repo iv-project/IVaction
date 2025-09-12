@@ -292,8 +292,8 @@ elif [ "$RUNNER_OS" = "Linux" ] && check_cmd "emscripten" && ! check_cmd "nosetu
   (
     cd emsdk
     git pull
-    ./emsdk install latest
-    ./emsdk activate latest
+    ./emsdk install 4.0.14 node-24.7.0-64bit
+    ./emsdk activate 4.0.14 node-24.7.0-64bit
   )
   source emsdk/emsdk_env.sh
   export CMAKE_LAUNCHER=emcmake
