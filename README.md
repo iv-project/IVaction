@@ -40,7 +40,8 @@ Each take following arguments:
     - `clang-latest`, `clang-second-latest`, `clang-third-latest` - referring to clang20 , clang19 and clang18
     - `msvc` - selects msvc (windows)
     - `intel` - selects intels llvm compiler (linux)
-    - `emscripten` - selects emscripten as compiler (linux)
+    - `emscripten` - selects 32bit emscripten as compiler (linux)
+    - `emscripten64` - selects 64bit emscripten as compiler (linux)
     - `cpp17` - requests c++17
     - `cpp20` - requests c++20
     - `cpp23` - requests c++23

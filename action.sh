@@ -53,7 +53,7 @@ check_cmd() {
 compile_cmds=("gcc11" "gcc12" "gcc13" "gcc14" "gcc15"
               "clang15" "clang16" "clang17" "clang18" "clang19" "clang20"
               "intel"
-              "emscripten"
+              "emscripten" "emscripten64"
               "msvc"
 )
 
@@ -295,6 +295,21 @@ elif [ "$RUNNER_OS" = "Linux" ] && check_cmd "emscripten" && ! check_cmd "nosetu
     ./emsdk install 4.0.14 node-24.7.0-64bit
     ./emsdk activate 4.0.14 node-24.7.0-64bit
   )
+  source emsdk/emsdk_env.sh
+  export CMAKE_LAUNCHER=emcmake
+elif [ "$RUNNER_OS" = "Linux" ] && check_cmd "emscripten64" && ! check_cmd "nosetup"; then
+  echo "## Setup emscripten64"
+  git clone https://github.com/emscripten-core/emsdk.git
+  (
+    cd emsdk
+    git pull
+    ./emsdk install 4.0.14 node-24.7.0-64bit
+    ./emsdk activate 4.0.14 node-24.7.0-64bit
+  )
+
+  export CMAKE_FLAGS="${CMAKE_FLAGS} -DCMAKE_EXE_LINKER_FLAGS='-sMEMORY64'"
+  export CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -sMEMORY64"
+  export CMAKE_C_FLAGS="${CMAKE_C_FLAGS} -sMEMORY64"
   source emsdk/emsdk_env.sh
   export CMAKE_LAUNCHER=emcmake
 fi
