@@ -53,6 +53,7 @@ jobs:
           - {os: ubuntu-22.04,   compiler: clang-second-latest-cpp20-release}
           - {os: ubuntu-22.04,   compiler: clang-third-latest-cpp20-release}
           - {os: ubuntu-22.04,   compiler: emscripten-cpp20-release, cmake_flags: "-DCMAKE_EXE_LINKER_FLAGS='-fexceptions -sSTACK_SIZE=1000000'", cmake_cxx_flags: "-Wno-c++11-narrowing -fexceptions"}
+          - {os: ubuntu-22.04,   compiler: emscripten64-cpp20-release, cmake_flags: "-DCMAKE_EXE_LINKER_FLAGS='-fexceptions -sSTACK_SIZE=1000000'", cmake_cxx_flags: "-Wno-c++11-narrowing -fexceptions"}
           - {os: ubuntu-22.04,   compiler: intel-cpp20-release}
           - {os: macos-14,       compiler: gcc14-cpp20-release}
           - {os: macos-14,       compiler: gcc15-cpp20-release}
