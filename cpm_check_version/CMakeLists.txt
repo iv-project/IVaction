@@ -4,7 +4,11 @@
 cmake_minimum_required (VERSION 3.14)
 project("CPM_CHECK_VERSION" DESCRIPTION "checks if any CPM packages can be updated")
 
-add_subdirectory(../repo cpm_check_version)
+set(REPO_PATH "../repo")
+if (DEFINED ENV{REPO_PATH})
+set(REPO_PATH "$ENV{REPO_PATH}")
+endif ()
+add_subdirectory("${REPO_PATH}" cpm_check_version)
 add_custom_target(CPM_CHECK_NEWER_PACKAGES)
 foreach(package ${CPM_PACKAGES})
     add_custom_target(CPM_CHECK_NEWER_PACKAGES_${package}
