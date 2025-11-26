@@ -144,6 +144,11 @@ if [ "$RUNNER_OS" = "Linux" ] && check_cmd "check_tag"; then
     fi
   fi
 fi
+if [ "$RUNNER_OS" = "Linux" ] && check_cmd "spdx_license_lint"; then
+  echo "## spdx_license_lint"
+  echo "this is handled by action.yaml"
+  exit 0
+fi
 if [ "$RUNNER_OS" = "Linux" ]; then
   if ! check_cmd "nosetup"; then
     echo "## Install tools (Linux)"
@@ -153,8 +158,8 @@ if [ "$RUNNER_OS" = "Linux" ]; then
     sudo apt-get install -y build-essential
     brew update
     brew upgrade
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
   fi
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 elif [ "$RUNNER_OS" = "macOS" ]; then
   if ! check_cmd "nosetup"; then
     echo "## Install tools (macOS)"
