@@ -107,7 +107,7 @@ runs:
     shell: bash
     run: |
       if [ -e "message.txt" ]; then
-        echo "MSSAGE=\"$(cat message.txt)\"" >> $GITHUB_ENV
+        echo "MESSAGE=\"$(cat message.txt)\"" >> $GITHUB_ENV
       fi
 
   - name: Open Issue
