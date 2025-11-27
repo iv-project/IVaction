@@ -77,7 +77,7 @@ valid_cmds=("nosetup"
             "sanitize_address" "sanitize_undefined" "sanitize_thread"
             "lcov"
             "cpm_version_check" "cpm_version_check_inline" "cpm_update_version"
-            "notests"
+            "notests" "pytest"
             "open_issue"
             "setup_only"
 )
@@ -491,5 +491,13 @@ for SUBFOLDER in "${SUBFOLDERS[@]}"; do
     echo "## Run tests (Windows)"
     cd ${SUBREPO_PATH}/${BUILD_PATH}
     ctest --verbose . -j ${THREADS} --output-on-failure --timeout ${CTEST_TIMEOUT}
+  fi
+  if check_cmd "pytest"; then
+    echo "## Running pytest"
+    cd ${SUBREPO_PATH}
+    echo "running pip install '.[test]'"
+    pip install pytest '.[test]'
+    echo "running pytest"
+    pytest tests
   fi
 done
