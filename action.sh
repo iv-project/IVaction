@@ -7,7 +7,6 @@ set -Eeuo pipefail
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 COMPILER="$1"
-shift
 CMAKE_FLAGS="${CMAKE_FLAGS:-}"
 CMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
 CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}"
@@ -124,6 +123,17 @@ echo CPM_DEPENDENCY_FILE=$CPM_DEPENDENCY_FILE
 echo REPO_PATH=$REPO_PATH
 check_has_compile_cmd && echo "must compile"
 check_has_compile_cmd || echo "no compile"
+
+# check if bash is updtodate otherwise restart this script
+V=$(bash --version | head -n 1 | cut -d ' ' -f 4 | cut -d '.' -f 1)
+if [ "$RUNNER_OS" = "macOS" ] && ! check_cmd "nosetup" && [ $V -lt 5 ]; then
+    eval "$(brew shellenv)"
+    brew update-reset
+    brew install bash
+    echo "restarting script"
+    $0 "$@"
+    exit 0
+fi
 
 if [ "$RUNNER_OS" = "Linux" ] && check_cmd "check_tag"; then
   echo "## Check if tagged"
