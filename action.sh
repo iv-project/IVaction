@@ -171,7 +171,9 @@ if [ "$RUNNER_OS" = "Linux" ]; then
     sudo apt-get install -y build-essential
     brew update
     brew upgrade
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  fi
+  if [ -e /home/linuxbrew ]; then
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
   fi
 elif [ "$RUNNER_OS" = "macOS" ]; then
   if ! check_cmd "nosetup"; then
