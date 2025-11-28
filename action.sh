@@ -20,7 +20,6 @@ GITHUB_REF_NAME="${GITHUB_REF_NAME:-$(git branch --show-current)}"
 CTEST_TIMEOUT="${CTEST_TIMEOUT:-7200}"         # ctest timeout value in seconds
 GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 CPM_DEPENDENCY_FILE="${CPM_DEPENDENCY_FILE:-}" # the dependency file that should be checked and updated
-SUBFOLDERS=(${SUBFOLDERS:-"."})                # only activated if non empty, space separated list
 SDKROOT=
 CMAKE_LAUNCHER="${CMAKE_LAUNCHER:-}"
 
@@ -134,6 +133,10 @@ if [ "$RUNNER_OS" = "macOS" ] && ! check_cmd "nosetup" && [ $V -lt 5 ]; then
     $0 "$@"
     exit 0
 fi
+
+SUBFOLDERS=(${SUBFOLDERS:-"."})                # only activated if non empty, space separated list
+echo SUBFOLDERS="${SUBFOLDERS[@]}"
+
 
 if [ "$RUNNER_OS" = "Linux" ] && check_cmd "check_tag"; then
   echo "## Check if tagged"
@@ -413,6 +416,8 @@ fi
 for SUBFOLDER in "${SUBFOLDERS[@]}"; do
   SUBREPO_PATH=${REPO_PATH}/${SUBFOLDER}
   BUILD_PATH=build-${COMPILER}
+  echo "visiting ${SUBFOLDER}, path: ${SUBREPO_PATH}"
+  echo "using build_path: ${BUILD_PATH}"
 
   if [ "$RUNNER_OS" = "Linux" ]; then
     if check_cmd "cpm_version_check"; then
