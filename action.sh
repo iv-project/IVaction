@@ -513,6 +513,17 @@ for SUBFOLDER in "${SUBFOLDERS[@]}"; do
   if check_cmd "pytest"; then
     echo "## Running pytest"
     cd ${SUBREPO_PATH}
+    echo "creating venv"
+    python -m venv ${RUNNER_TEMP}/.venv
+    echo "activating venv"
+    if [ -e ${RUNNER_TEMP}/.venv/bin/activate ]; then
+        source ${RUNNER_TEMP}/.venv/bin/activate
+    elif [ -e ${RUNNER_TEMP}/.venv/Scripts/activate ]; then
+        source ${RUNNER_TEMP}/.venv/Scripts/activate
+    else
+        echo "unclear how to activate python venv environment"
+        exit 1
+    fi
     echo "running pip install '.[test]'"
     pip install pytest '.[test]'
     echo "running pytest"
