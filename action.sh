@@ -30,9 +30,9 @@ bash --version
 COMPILER="$(echo ${COMPILER} | sed "s/gcc-latest/gcc15/")"
 COMPILER="$(echo ${COMPILER} | sed "s/gcc-second-latest/gcc14/")"
 COMPILER="$(echo ${COMPILER} | sed "s/gcc-third-latest/gcc13/")"
-COMPILER="$(echo ${COMPILER} | sed "s/clang-latest/clang20/")"
-COMPILER="$(echo ${COMPILER} | sed "s/clang-second-latest/clang19/")"
-COMPILER="$(echo ${COMPILER} | sed "s/clang-third-latest/clang18/")"
+COMPILER="$(echo ${COMPILER} | sed "s/clang-latest/clang21/")"
+COMPILER="$(echo ${COMPILER} | sed "s/clang-second-latest/clang20/")"
+COMPILER="$(echo ${COMPILER} | sed "s/clang-third-latest/clang19/")"
 
 
 check_cmd() {
@@ -50,7 +50,7 @@ check_cmd() {
 }
 
 compile_cmds=("gcc11" "gcc12" "gcc13" "gcc14" "gcc15"
-              "clang15" "clang16" "clang17" "clang18" "clang19" "clang20"
+              "clang15" "clang16" "clang17" "clang18" "clang19" "clang20" "clang21"
               "intel"
               "emscripten" "emscripten64"
               "msvc"
@@ -224,7 +224,7 @@ setup_clang_v2() {
     pkg=llvm@${v}
     lldpkg=lld@${v}
     libomp=
-    if [ "${v}" == 20 ]; then
+    if [ "${v}" == 20 ] || [ "${v}" == 21 ]; then
         if [ "$RUNNER_OS" = "macOS" ]; then
             pkg=llvm #!HACK homebrew doesn't install llvm@20 on macOS?
             lldpkg=lld
@@ -248,7 +248,7 @@ setup_clang_v2() {
     INSTALL_PREFIX=$(brew --prefix $pkg)
     export PATH="${INSTALL_PREFIX}/bin${PATH:+:${PATH}}"
     export LDFLAGS="-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++ ${LDFLAGS:-}"
-    if [ "$RUNNER_OS" = "Linux" ] && [ "${v}" == 20 ]; then
+    if [ "$RUNNER_OS" = "Linux" ] && ([ "${v}" == 20 ] || [ "${v}" == 21 ]); then
         export LD_LIBRARY_PATH=$(brew --prefix $libomp)/lib
     fi
 
@@ -276,6 +276,7 @@ if [ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]; then
   elif check_cmd "clang18"; then   setup_clang_v 18
   elif check_cmd "clang19"; then   setup_clang_v2 19
   elif check_cmd "clang20"; then   setup_clang_v2 20
+  elif check_cmd "clang21"; then   setup_clang_v2 21
   fi
 fi
 if [ "$RUNNER_OS" = "Linux" ] && check_cmd "intel"; then
