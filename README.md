@@ -37,7 +37,8 @@ Each take following arguments:
     - `clang18` - selects clang 18 (linux and macos)
     - `clang19` - selects clang 19 (linux and macos-13)
     - `clang20` - selects clang 20 (linux and macos)
-    - `clang-latest`, `clang-second-latest`, `clang-third-latest` - referring to clang20 , clang19 and clang18
+    - `clang21` - selects clang 21 (linux and macos)
+    - `clang-latest`, `clang-second-latest`, `clang-third-latest` - referring to clang21 , clang20 and clang19
     - `msvc` - selects msvc (windows)
     - `intel` - selects intels llvm compiler (linux)
     - `emscripten` - selects 32bit emscripten as compiler (linux)
@@ -59,6 +60,7 @@ Each take following arguments:
     - `cpm_update_version` - check cpm dependency file and creates an PR with fix (linux)
     - `spdx_license_lint` - checks if all files follow spdx header licensing (linux)
     - `check_tag` - checks if the current HEAD has a tag (linux)
+    - `pytest` - runs additional pytest on <REPO_PATH>/tests
     - `notests` - will not run any ctests
     - `open_issue` - will open an issue on failure
 

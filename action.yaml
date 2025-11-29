@@ -51,6 +51,9 @@ inputs:
     description: "multiple targets each located in a different subdir (separated by spaces)"
     required: false
     default: ""
+  debug:
+    description: "starts a sshd server before running the actions"
+    default: ""
 
 
 runs:
@@ -73,6 +76,10 @@ runs:
     uses: fsfe/reuse-action@v6
     with:
       args: --suppress-deprecation --root repo lint
+
+  - name: Debug
+    if: ${{ inputs.debug == 'ssh' }}
+    uses: valeriangalliat/action-sshd-cloudflared@v1
 
   - name: Load MSVC Tools (Windows)
     uses: ilammy/msvc-dev-cmd@v1
@@ -107,7 +114,7 @@ runs:
     shell: bash
     run: |
       if [ -e "message.txt" ]; then
-        echo "MSSAGE=\"$(cat message.txt)\"" >> $GITHUB_ENV
+        echo "MESSAGE=\"$(cat message.txt)\"" >> $GITHUB_ENV
       fi
 
   - name: Open Issue

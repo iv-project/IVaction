@@ -7,7 +7,6 @@ set -Eeuo pipefail
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 COMPILER="$1"
-shift
 CMAKE_FLAGS="${CMAKE_FLAGS:-}"
 CMAKE_C_FLAGS="${CMAKE_C_FLAGS:-}"
 CMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-}"
@@ -21,7 +20,6 @@ GITHUB_REF_NAME="${GITHUB_REF_NAME:-$(git branch --show-current)}"
 CTEST_TIMEOUT="${CTEST_TIMEOUT:-7200}"         # ctest timeout value in seconds
 GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 CPM_DEPENDENCY_FILE="${CPM_DEPENDENCY_FILE:-}" # the dependency file that should be checked and updated
-SUBFOLDERS=(${SUBFOLDERS:-"."})                # only activated if non empty, space separated list
 SDKROOT=
 CMAKE_LAUNCHER="${CMAKE_LAUNCHER:-}"
 
@@ -31,9 +29,9 @@ bash --version
 COMPILER="$(echo ${COMPILER} | sed "s/gcc-latest/gcc15/")"
 COMPILER="$(echo ${COMPILER} | sed "s/gcc-second-latest/gcc14/")"
 COMPILER="$(echo ${COMPILER} | sed "s/gcc-third-latest/gcc13/")"
-COMPILER="$(echo ${COMPILER} | sed "s/clang-latest/clang20/")"
-COMPILER="$(echo ${COMPILER} | sed "s/clang-second-latest/clang19/")"
-COMPILER="$(echo ${COMPILER} | sed "s/clang-third-latest/clang18/")"
+COMPILER="$(echo ${COMPILER} | sed "s/clang-latest/clang21/")"
+COMPILER="$(echo ${COMPILER} | sed "s/clang-second-latest/clang20/")"
+COMPILER="$(echo ${COMPILER} | sed "s/clang-third-latest/clang19/")"
 
 
 check_cmd() {
@@ -51,7 +49,7 @@ check_cmd() {
 }
 
 compile_cmds=("gcc11" "gcc12" "gcc13" "gcc14" "gcc15"
-              "clang15" "clang16" "clang17" "clang18" "clang19" "clang20"
+              "clang15" "clang16" "clang17" "clang18" "clang19" "clang20" "clang21"
               "intel"
               "emscripten" "emscripten64"
               "msvc"
@@ -77,7 +75,7 @@ valid_cmds=("nosetup"
             "sanitize_address" "sanitize_undefined" "sanitize_thread"
             "lcov"
             "cpm_version_check" "cpm_version_check_inline" "cpm_update_version"
-            "notests"
+            "notests" "pytest"
             "open_issue"
             "setup_only"
 )
@@ -125,6 +123,21 @@ echo REPO_PATH=$REPO_PATH
 check_has_compile_cmd && echo "must compile"
 check_has_compile_cmd || echo "no compile"
 
+# check if bash is updtodate otherwise restart this script
+V=$(bash --version | head -n 1 | cut -d ' ' -f 4 | cut -d '.' -f 1)
+if [ "$RUNNER_OS" = "macOS" ] && ! check_cmd "nosetup" && [ $V -lt 5 ]; then
+    eval "$(brew shellenv)"
+    brew update-reset
+    brew install bash
+    echo "restarting script"
+    $0 "$@"
+    exit 0
+fi
+
+SUBFOLDERS=(${SUBFOLDERS:-"."})                # only activated if non empty, space separated list
+echo SUBFOLDERS="${SUBFOLDERS[@]}"
+
+
 if [ "$RUNNER_OS" = "Linux" ] && check_cmd "check_tag"; then
   echo "## Check if tagged"
   cd ${REPO_PATH}
@@ -144,6 +157,11 @@ if [ "$RUNNER_OS" = "Linux" ] && check_cmd "check_tag"; then
     fi
   fi
 fi
+if [ "$RUNNER_OS" = "Linux" ] && check_cmd "spdx_license_lint"; then
+  echo "## spdx_license_lint"
+  echo "this is handled by action.yaml"
+  exit 0
+fi
 if [ "$RUNNER_OS" = "Linux" ]; then
   if ! check_cmd "nosetup"; then
     echo "## Install tools (Linux)"
@@ -154,7 +172,9 @@ if [ "$RUNNER_OS" = "Linux" ]; then
     brew update
     brew upgrade
   fi
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  if [ -e /home/linuxbrew ]; then
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  fi
 elif [ "$RUNNER_OS" = "macOS" ]; then
   if ! check_cmd "nosetup"; then
     echo "## Install tools (macOS)"
@@ -209,7 +229,7 @@ setup_clang_v2() {
     pkg=llvm@${v}
     lldpkg=lld@${v}
     libomp=
-    if [ "${v}" == 20 ]; then
+    if [ "${v}" == 20 ] || [ "${v}" == 21 ]; then
         if [ "$RUNNER_OS" = "macOS" ]; then
             pkg=llvm #!HACK homebrew doesn't install llvm@20 on macOS?
             lldpkg=lld
@@ -233,7 +253,7 @@ setup_clang_v2() {
     INSTALL_PREFIX=$(brew --prefix $pkg)
     export PATH="${INSTALL_PREFIX}/bin${PATH:+:${PATH}}"
     export LDFLAGS="-L${INSTALL_PREFIX}/lib/c++ -Wl,-rpath,${INSTALL_PREFIX}/lib/c++ ${LDFLAGS:-}"
-    if [ "$RUNNER_OS" = "Linux" ] && [ "${v}" == 20 ]; then
+    if [ "$RUNNER_OS" = "Linux" ] && ([ "${v}" == 20 ] || [ "${v}" == 21 ]); then
         export LD_LIBRARY_PATH=$(brew --prefix $libomp)/lib
     fi
 
@@ -261,6 +281,7 @@ if [ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]; then
   elif check_cmd "clang18"; then   setup_clang_v 18
   elif check_cmd "clang19"; then   setup_clang_v2 19
   elif check_cmd "clang20"; then   setup_clang_v2 20
+  elif check_cmd "clang21"; then   setup_clang_v2 21
   fi
 fi
 if [ "$RUNNER_OS" = "Linux" ] && check_cmd "intel"; then
@@ -397,6 +418,8 @@ fi
 for SUBFOLDER in "${SUBFOLDERS[@]}"; do
   SUBREPO_PATH=${REPO_PATH}/${SUBFOLDER}
   BUILD_PATH=build-${COMPILER}
+  echo "visiting ${SUBFOLDER}, path: ${SUBREPO_PATH}"
+  echo "using build_path: ${BUILD_PATH}"
 
   if [ "$RUNNER_OS" = "Linux" ]; then
     if check_cmd "cpm_version_check"; then
@@ -415,7 +438,7 @@ for SUBFOLDER in "${SUBFOLDERS[@]}"; do
       make CPM_CHECK_NEWER_PACKAGES
     fi
 
-    if check_cmd "cpm_version_check"; then
+    if check_cmd "cpm_update_version"; then
       cd $SUBREPO_PATH
       ${ACTION_PATH}/fix_dependency_file/updatePackagesAndPR.sh ${CPM_DEPENDENCY_FILE} $'\nclose and reopen this issue to trigger CI\n(generated by IVAction)'
     fi
@@ -486,5 +509,24 @@ for SUBFOLDER in "${SUBFOLDERS[@]}"; do
     echo "## Run tests (Windows)"
     cd ${SUBREPO_PATH}/${BUILD_PATH}
     ctest --verbose . -j ${THREADS} --output-on-failure --timeout ${CTEST_TIMEOUT}
+  fi
+  if check_cmd "pytest"; then
+    echo "## Running pytest"
+    cd ${SUBREPO_PATH}
+    echo "creating venv"
+    python -m venv ${RUNNER_TEMP}/.venv
+    echo "activating venv"
+    if [ -e ${RUNNER_TEMP}/.venv/bin/activate ]; then
+        source ${RUNNER_TEMP}/.venv/bin/activate
+    elif [ -e ${RUNNER_TEMP}/.venv/Scripts/activate ]; then
+        source ${RUNNER_TEMP}/.venv/Scripts/activate
+    else
+        echo "unclear how to activate python venv environment"
+        exit 1
+    fi
+    echo "running pip install '.[test]'"
+    pip install pytest '.[test]'
+    echo "running pytest"
+    pytest tests
   fi
 done
