@@ -79,7 +79,7 @@ runs:
 
   - name: Debug
     if: ${{ inputs.debug == 'ssh' }}
-    uses: valeriangalliat/action-sshd-cloudflared@v1
+    uses: valeriangalliat/action-sshd-cloudflared@v4
 
   - name: Load MSVC Tools (Windows)
     uses: ilammy/msvc-dev-cmd@v1
