@@ -73,9 +73,11 @@ jobs:
                                            msvc-cpp20-relwithdebinfo-sanitize_address
                                            msvc-cpp20-debug
             }
+          - {os: windows-11-arm, compiler: msvc-cpp20-release
+                                           msvc-cpp20-debug
+            }
     steps:
-      - name: Standard IV-project testing
-        uses: iv-project/IVaction@feat/clang22
+        uses: iv-project/IVaction@feat/win11arm
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2

@@ -111,17 +111,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {os: ubuntu-22.04, compiler: spdx_license_lint}
-          - {os: ubuntu-22.04, compiler: cpm_version_check}
-          - {os: ubuntu-22.04, compiler: gcc15-cpp20-release}
-          - {os: ubuntu-22.04, compiler: gcc14-cpp20-release}
-          - {os: ubuntu-22.04, compiler: gcc13-cpp20-release}
-          - {os: ubuntu-22.04, compiler: gcc15-cpp20-debug-sanitize_address}
-          - {os: ubuntu-22.04, compiler: gcc15-cpp20-debug-sanitize_undefined}
-          - {os: ubuntu-22.04, compiler: gcc15-cpp20-lcov}
-          - {os: ubuntu-22.04, compiler: clang20-cpp20-release}
-          - {os: macos-14,     compiler: gcc15-cpp20-release}
-          - {os: macos-14,     compiler: clang20-cpp20-release}
+          - {os: ubuntu-22.04,   compiler: spdx_license_lint}
+          - {os: ubuntu-22.04,   compiler: cpm_version_check}
+          - {os: ubuntu-22.04,   compiler: gcc15-cpp20-release}
+          - {os: ubuntu-22.04,   compiler: gcc14-cpp20-release}
+          - {os: ubuntu-22.04,   compiler: gcc13-cpp20-release}
+          - {os: ubuntu-22.04,   compiler: gcc15-cpp20-debug-sanitize_address}
+          - {os: ubuntu-22.04,   compiler: gcc15-cpp20-debug-sanitize_undefined}
+          - {os: ubuntu-22.04,   compiler: gcc15-cpp20-lcov}
+          - {os: ubuntu-22.04,   compiler: clang20-cpp20-release}
+          - {os: macos-14,       compiler: gcc15-cpp20-release}
+          - {os: macos-14,       compiler: clang20-cpp20-release}
+          - {os: macos-15-intel, compiler: gcc15-cpp20-release}
+          - {os: macos-15-intel, compiler: clang20-cpp20-release}
+          - {os: windows-2022,   compiler: msvc-cpp20-release}
+          - {os: winows-11-arm,  compiler: msvc-cpp20-release}
     steps:
       - name: Standard IV-project testing
         uses: iv-project/IVaction@v10.10 # make sure this is the newest version
