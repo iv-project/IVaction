@@ -77,7 +77,8 @@ jobs:
                                            msvc-cpp20-debug
             }
     steps:
-        uses: iv-project/IVaction@feat/win11arm
+      - name: Standard IV-project testing
+        uses: iv-project/IVaction@main
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
