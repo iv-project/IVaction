@@ -38,7 +38,8 @@ Each take following arguments:
     - `clang19` - selects clang 19 (linux and macos-13)
     - `clang20` - selects clang 20 (linux and macos)
     - `clang21` - selects clang 21 (linux and macos)
-    - `clang-latest`, `clang-second-latest`, `clang-third-latest` - referring to clang21 , clang20 and clang19
+    - `clang22` - selects clang 21 (linux and macos)
+    - `clang-latest`, `clang-second-latest`, `clang-third-latest` - referring to clang22 , clang21 and clang20
     - `msvc` - selects msvc (windows)
     - `intel` - selects intels llvm compiler (linux)
     - `emscripten` - selects 32bit emscripten as compiler (linux)
