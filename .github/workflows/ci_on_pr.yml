@@ -75,7 +75,7 @@ jobs:
             }
     steps:
       - name: Standard IV-project testing
-        uses: iv-project/IVaction@main
+        uses: iv-project/IVaction@feat/clang22
         with:
           compiler: ${{ matrix.compiler }}
           threads: 2
