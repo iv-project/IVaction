@@ -26,9 +26,9 @@ CMAKE_LAUNCHER="${CMAKE_LAUNCHER:-}"
 bash --version
 
 # convert generic compiler to uptodate version
-COMPILER="$(echo ${COMPILER} | sed "s/gcc-latest/gcc15/")"
-COMPILER="$(echo ${COMPILER} | sed "s/gcc-second-latest/gcc14/")"
-COMPILER="$(echo ${COMPILER} | sed "s/gcc-third-latest/gcc13/")"
+COMPILER="$(echo ${COMPILER} | sed "s/gcc-latest/gcc16/")"
+COMPILER="$(echo ${COMPILER} | sed "s/gcc-second-latest/gcc15/")"
+COMPILER="$(echo ${COMPILER} | sed "s/gcc-third-latest/gcc14/")"
 COMPILER="$(echo ${COMPILER} | sed "s/clang-latest/clang22/")"
 COMPILER="$(echo ${COMPILER} | sed "s/clang-second-latest/clang21/")"
 COMPILER="$(echo ${COMPILER} | sed "s/clang-third-latest/clang20/")"
@@ -48,7 +48,7 @@ check_cmd() {
     return 1
 }
 
-compile_cmds=("gcc11" "gcc12" "gcc13" "gcc14" "gcc15"
+compile_cmds=("gcc11" "gcc12" "gcc13" "gcc14" "gcc15" "gcc16"
               "clang15" "clang16" "clang17" "clang18" "clang19" "clang20" "clang21" "clang22"
               "intel"
               "emscripten" "emscripten64"
@@ -278,6 +278,7 @@ if [ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "macOS" ]; then
   elif check_cmd "gcc13"; then     setup_gcc_v 13
   elif check_cmd "gcc14"; then     setup_gcc_v 14
   elif check_cmd "gcc15"; then     setup_gcc_v 15
+  elif check_cmd "gcc16"; then     setup_gcc_v 16
   elif check_cmd "clang15"; then   setup_clang_v 15
   elif check_cmd "clang16"; then   setup_clang_v 16
   elif check_cmd "clang17"; then   setup_clang_v 17
