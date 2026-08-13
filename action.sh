@@ -318,8 +318,8 @@ elif [ "$RUNNER_OS" = "Linux" ] && check_cmd "emscripten" && ! check_cmd "nosetu
   (
     cd emsdk
     git pull
-    ./emsdk install 4.0.14 node-24.7.0-64bit
-    ./emsdk activate 4.0.14 node-24.7.0-64bit
+    ./emsdk install 5.0.7 node-24.19.0-64bit
+    ./emsdk activate 5.0.7 node-24.19.0-64bit
   )
   source emsdk/emsdk_env.sh
   export CMAKE_LAUNCHER=emcmake
@@ -329,8 +329,8 @@ elif [ "$RUNNER_OS" = "Linux" ] && check_cmd "emscripten64" && ! check_cmd "nose
   (
     cd emsdk
     git pull
-    ./emsdk install 4.0.14 node-24.7.0-64bit
-    ./emsdk activate 4.0.14 node-24.7.0-64bit
+    ./emsdk install 6.0.6 node-24.19.0-64bit
+    ./emsdk activate 6.0.6 node-24.19.0-64bit
   )
 
   export CMAKE_FLAGS="${CMAKE_FLAGS} -DCMAKE_EXE_LINKER_FLAGS='-sMEMORY64'"
