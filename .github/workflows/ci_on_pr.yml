@@ -30,17 +30,18 @@ jobs:
           - {os: ubuntu-22.04,   compiler: gcc12-cpp20-release}
           - {os: ubuntu-22.04,   compiler: gcc13-cpp20-release}
           - {os: ubuntu-22.04,   compiler: gcc14-cpp20-release}
-          - {os: ubuntu-22.04,   compiler: gcc15-setup_only-lcov
-                                           gcc15-nosetup-cpp11-release
-                                           gcc15-nosetup-cpp14-release
-                                           gcc15-nosetup-cpp17-release
-                                           gcc15-nosetup-cpp20-release
-                                           gcc15-nosetup-cpp23-release
-                                           gcc15-nosetup-cpp26-release
-                                           gcc15-nosetup-cpp20-lcov
-                                           gcc15-nosetup-cpp20-debug-sanitize_address
-                                           gcc15-nosetup-cpp20-debug-sanitize_undefined
-                                           gcc15-nosetup-cpp20-debug-sanitize_thread
+          - {os: ubuntu-22.04,   compiler: gcc15-cpp20-release}
+          - {os: ubuntu-22.04,   compiler: gcc16-setup_only-lcov
+                                           gcc16-nosetup-cpp11-release
+                                           gcc16-nosetup-cpp14-release
+                                           gcc16-nosetup-cpp17-release
+                                           gcc16-nosetup-cpp20-release
+                                           gcc16-nosetup-cpp23-release
+                                           gcc16-nosetup-cpp26-release
+                                           gcc16-nosetup-cpp20-lcov
+                                           gcc16-nosetup-cpp20-debug-sanitize_address
+                                           gcc16-nosetup-cpp20-debug-sanitize_undefined
+                                           gcc16-nosetup-cpp20-debug-sanitize_thread
             }
           - {os: ubuntu-22.04,   compiler: gcc-latest-cpp20-release}
           - {os: ubuntu-22.04,   compiler: gcc-second-latest-cpp20-release}
@@ -59,11 +60,13 @@ jobs:
           - {os: ubuntu-22.04,   compiler: intel-cpp20-release}
           - {os: macos-14,       compiler: gcc14-cpp20-release}
           - {os: macos-14,       compiler: gcc15-cpp20-release}
+          - {os: macos-14,       compiler: gcc16-cpp20-release}
           - {os: macos-14,       compiler: clang20-cpp20-release}
           - {os: macos-14,       compiler: clang21-cpp20-release}
           - {os: macos-14,       compiler: clang22-cpp20-release}
           - {os: macos-15-intel, compiler: gcc14-cpp20-release}
           - {os: macos-15-intel, compiler: gcc15-cpp20-release}
+          - {os: macos-15-intel, compiler: gcc16-cpp20-release}
           - {os: macos-15-intel, compiler: clang19-cpp20-release}
           - {os: macos-15-intel, compiler: clang20-cpp20-release}
           - {os: macos-15-intel, compiler: clang21-cpp20-release}

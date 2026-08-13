@@ -30,7 +30,8 @@ Each take following arguments:
     - `gcc13` - selects gcc 13 (linux and macos)
     - `gcc14` - selects gcc 14 (linux and macos)
     - `gcc15` - selects gcc 15 (linux and macos)
-    - `gcc-latest`, `gcc-second-latest`, `gcc-third-latest` - referring to gcc15 , gcc14 and gcc13
+    - `gcc16` - selects gcc 16 (linux and macos)
+    - `gcc-latest`, `gcc-second-latest`, `gcc-third-latest` - referring to gcc16, gcc15 and gcc14
     - `clang15` - selects clang 15 (linux and macos)
     - `clang16` - selects clang 16 (linux and macos)
     - `clang17` - selects clang 17 (linux and macos)
@@ -38,8 +39,8 @@ Each take following arguments:
     - `clang19` - selects clang 19 (linux and macos-13)
     - `clang20` - selects clang 20 (linux and macos)
     - `clang21` - selects clang 21 (linux and macos)
-    - `clang22` - selects clang 21 (linux and macos)
-    - `clang-latest`, `clang-second-latest`, `clang-third-latest` - referring to clang22 , clang21 and clang20
+    - `clang22` - selects clang 22 (linux and macos)
+    - `clang-latest`, `clang-second-latest`, `clang-third-latest` - referring to clang22, clang21 and clang20
     - `msvc` - selects msvc (windows)
     - `intel` - selects intels llvm compiler (linux)
     - `emscripten` - selects 32bit emscripten as compiler (linux)
