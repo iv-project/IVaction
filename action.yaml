@@ -119,7 +119,7 @@ runs:
 
   - name: Open Issue
     if: failure() && (endsWith(inputs.compiler, '-open_issue') || contains(inputs.compiler, '-open_issue-'))
-    uses: jayqi/failed-build-issue-action@v1.2.0
+    uses: jayqi/failed-build-issue-action@v1.3.0
     with:
       github-token: ${{ inputs.github_token }}
       always-create-new-issue: true
